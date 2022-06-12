@@ -39,7 +39,14 @@ function SongList(props: Props) {
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding dense>
           {songs.map(({ url, title }) => (
-            <ListItemButton component="a" href={url} key={title} sx={{ pl: 4 }}>
+            <ListItemButton
+              component="a"
+              href={url}
+              target="_blank"
+              rel="noopener"
+              key={title}
+              sx={{ pl: 4 }}
+            >
               <Tooltip arrow title={labelURL(url)} placement="bottom-start">
                 <ListItemText>
                   <Link>{title}</Link>
