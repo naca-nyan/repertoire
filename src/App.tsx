@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import "./App.css";
 import {
   AppBar,
+  Box,
   Button,
+  Input,
   List,
   ListSubheader,
   Paper,
-  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -14,6 +15,7 @@ import { Container } from "@mui/system";
 
 import data from "./data.json";
 import SongList from "./SongList";
+import { Search } from "@mui/icons-material";
 
 interface Song {
   artist: string;
@@ -29,15 +31,25 @@ function makeSong(obj: Partial<Song>): Song {
   };
 }
 
-const songsOf: Map<string, Song[]> = data.reduce((map, obj) => {
-  const song = makeSong(obj);
-  const songs = map.get(song.artist) ?? [];
-  map.set(song.artist, [...songs, song]);
+function songMap(data: Song[]): Map<string, Song[]> {
+  const map = data.reduce((map, obj) => {
+    const song = makeSong(obj);
+    const songs = map.get(song.artist) ?? [];
+    map.set(song.artist, [...songs, song]);
+    return map;
+  }, new Map());
   return map;
-}, new Map());
-
+}
 function SongListAll() {
-  const sorted = Array.from(songsOf.entries()); //.sort().reverse();
+  const [searchWord, setSearchWord] = useState("");
+  const filtered = searchWord
+    ? data.filter(
+        ({ artist, title, url }) =>
+          artist.includes(searchWord) || title.includes(searchWord)
+      )
+    : data;
+  const songsOf = songMap(filtered);
+  const sorted = Array.from(songsOf.entries());
 
   const [collapsed, setCollapseAll] = useState(false);
   return (
@@ -45,12 +57,19 @@ function SongListAll() {
       component="nav"
       dense
       subheader={
-        <ListSubheader>
-          <Stack direction="row" justifyContent="right" sx={{ p: 1 }}>
+        <ListSubheader component="div">
+          <Toolbar>
+            <Box sx={{ display: "flex", alignItems: "flex-end", flexGrow: 1 }}>
+              <Search sx={{ my: 0.5, mr: 1 }} />
+              <Input
+                placeholder="Search..."
+                onChange={(e) => setSearchWord(e.target.value)}
+              />
+            </Box>
             <Button size="small" onClick={() => setCollapseAll(!collapsed)}>
               {collapsed ? "Open" : "Close"} All
             </Button>
-          </Stack>
+          </Toolbar>
         </ListSubheader>
       }
     >
@@ -74,7 +93,7 @@ function App() {
       <main>
         <Container maxWidth="sm" sx={{ pt: 2 }}>
           <Paper elevation={3}>
-            <SongListAll></SongListAll>
+            <SongListAll />
           </Paper>
         </Container>
       </main>
