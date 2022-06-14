@@ -6,6 +6,7 @@ import {
   ListItemButton,
   ListItemText,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
 import { Song, songMap } from "./song";
@@ -37,7 +38,7 @@ const SongListItem: React.FC<{
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding dense>
-          {songs.map(({ url, title }) => (
+          {songs.map(({ url, title, comment }) => (
             <ListItemButton
               component="a"
               href={url}
@@ -50,6 +51,11 @@ const SongListItem: React.FC<{
                 <ListItemText>
                   <Link component="span">{title}</Link>
                   <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
+                  <Typography
+                    sx={{ float: "right", color: "#999", fontSize: "1em" }}
+                  >
+                    {comment}
+                  </Typography>
                 </ListItemText>
               </Tooltip>
             </ListItemButton>

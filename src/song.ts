@@ -2,6 +2,7 @@ export interface Song {
   artist: string;
   title: string;
   url: string;
+  comment?: string;
 }
 
 function makeSong(obj: Partial<Song>): Song {
@@ -9,6 +10,7 @@ function makeSong(obj: Partial<Song>): Song {
     artist: obj.artist ?? "",
     title: obj.title ?? "",
     url: obj.url ?? "",
+    comment: obj.comment,
   };
 }
 
