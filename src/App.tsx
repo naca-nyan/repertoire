@@ -43,7 +43,7 @@ const SongListSubHeader: React.FC<{
 function SongListAll() {
   const [searchWord, setSearchWord] = useState("");
   const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
-  useDebounce(() => setDebouncedSearchWord(searchWord), 50, [searchWord]);
+  useDebounce(() => setDebouncedSearchWord(searchWord), 300, [searchWord]);
 
   const [collapsed, setCollapsed] = useState(false);
 
