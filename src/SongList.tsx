@@ -62,6 +62,13 @@ function SongListItem(props: Props) {
   );
 }
 
+function songIncludes(filter: string) {
+  const weakIncludes = (a: string, b: string) =>
+    a.toLowerCase().includes(b.toLowerCase());
+  return ({ artist, title }: Song) =>
+    weakIncludes(artist, filter) || weakIncludes(title, filter);
+}
+
 function SongList({
   data,
   filter,
@@ -72,13 +79,7 @@ function SongList({
   collapsed: boolean;
 }) {
   const filtered = useMemo(
-    () =>
-      filter
-        ? data.filter(
-            ({ artist, title, url }) =>
-              artist.includes(filter) || title.includes(filter)
-          )
-        : data,
+    () => (filter ? data.filter(songIncludes(filter)) : data),
     [filter]
   );
   const songsOf = songMap(filtered);
