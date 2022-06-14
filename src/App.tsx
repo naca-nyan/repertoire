@@ -16,7 +16,7 @@ import { Container } from "@mui/system";
 
 import data from "./data.json";
 import SongList from "./SongList";
-import { Search } from "@mui/icons-material";
+import { LibraryMusic, Search } from "@mui/icons-material";
 import { useDebounce } from "react-use";
 
 const SongListSubHeader: React.FC<{
@@ -68,6 +68,7 @@ function App() {
     <div className="App">
       <AppBar position="relative">
         <Toolbar>
+          <LibraryMusic sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
           <Typography variant="h6" color="inherit" noWrap>
             なかんにゃの知っとる曲
           </Typography>
