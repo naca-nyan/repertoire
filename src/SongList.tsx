@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Collapse,
   Link,
@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
+import { Song, songMap } from "./song";
 
 interface Props {
   artist: string;
@@ -23,7 +24,7 @@ function labelURL(url: string): string {
   return label ? `${label} (${urlDecoded})` : urlDecoded;
 }
 
-function SongList(props: Props) {
+function SongListItem(props: Props) {
   const { artist, songs } = props;
   useEffect(() => setOpen(props.open ?? true), [props.open]);
   const [open, setOpen] = useState(props.open ?? true);
@@ -49,7 +50,7 @@ function SongList(props: Props) {
             >
               <Tooltip arrow title={labelURL(url)} placement="bottom-start">
                 <ListItemText>
-                  <Link>{title}</Link>
+                  <Link component="span">{title}</Link>
                   <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
                 </ListItemText>
               </Tooltip>
@@ -60,4 +61,35 @@ function SongList(props: Props) {
     </>
   );
 }
-export default SongList;
+
+function SongList({
+  data,
+  filter,
+  collapsed,
+}: {
+  data: Song[];
+  filter: string;
+  collapsed: boolean;
+}) {
+  const filtered = useMemo(
+    () =>
+      filter
+        ? data.filter(
+            ({ artist, title, url }) =>
+              artist.includes(filter) || title.includes(filter)
+          )
+        : data,
+    [filter]
+  );
+  const songsOf = songMap(filtered);
+  const sorted = Array.from(songsOf.entries());
+  return (
+    <>
+      {sorted.map(([k, v]) => (
+        <SongListItem key={k} artist={k} songs={v} open={!collapsed} />
+      ))}
+    </>
+  );
+}
+
+export default React.memo(SongList);

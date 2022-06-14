@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./App.css";
 import {
   AppBar,
   Box,
   Button,
+  Divider,
   Input,
   List,
   ListSubheader,
@@ -16,40 +17,12 @@ import { Container } from "@mui/system";
 import data from "./data.json";
 import SongList from "./SongList";
 import { Search } from "@mui/icons-material";
+import { useDebounce } from "react-use";
 
-interface Song {
-  artist: string;
-  title: string;
-  url: string;
-}
-
-function makeSong(obj: Partial<Song>): Song {
-  return {
-    artist: obj.artist ?? "",
-    title: obj.title ?? "",
-    url: obj.url ?? "",
-  };
-}
-
-function songMap(data: Song[]): Map<string, Song[]> {
-  const map = data.reduce((map, obj) => {
-    const song = makeSong(obj);
-    const songs = map.get(song.artist) ?? [];
-    map.set(song.artist, [...songs, song]);
-    return map;
-  }, new Map());
-  return map;
-}
 function SongListAll() {
   const [searchWord, setSearchWord] = useState("");
-  const filtered = searchWord
-    ? data.filter(
-        ({ artist, title, url }) =>
-          artist.includes(searchWord) || title.includes(searchWord)
-      )
-    : data;
-  const songsOf = songMap(filtered);
-  const sorted = Array.from(songsOf.entries());
+  const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
+  useDebounce(() => setDebouncedSearchWord(searchWord), 50, [searchWord]);
 
   const [collapsed, setCollapseAll] = useState(false);
   return (
@@ -70,12 +43,15 @@ function SongListAll() {
               {collapsed ? "Open" : "Close"} All
             </Button>
           </Toolbar>
+          <Divider />
         </ListSubheader>
       }
     >
-      {sorted.map(([k, v]) => (
-        <SongList key={k} artist={k} songs={v} open={!collapsed}></SongList>
-      ))}
+      <SongList
+        data={data}
+        filter={debouncedSearchWord}
+        collapsed={collapsed}
+      />
     </List>
   );
 }
