@@ -1,67 +1,37 @@
-import React, { ChangeEventHandler, MouseEventHandler, useState } from "react";
+import React from "react";
 import "./App.css";
 import {
   AppBar,
-  Box,
-  Button,
-  Divider,
-  Input,
   List,
-  ListSubheader,
-  Paper,
+  ListItemButton,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { Container } from "@mui/system";
 
-import data from "./data.json";
-import SongList from "./SongList";
-import { LibraryMusic, Search } from "@mui/icons-material";
-import { useDebounce } from "react-use";
+import { LibraryMusic } from "@mui/icons-material";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import SongPage from "./SongPage";
 
-const SongListSubHeader: React.FC<{
-  collapsed: boolean;
-  onChangeSearchWord: ChangeEventHandler<HTMLInputElement>;
-  onClickToggleButton: MouseEventHandler;
-}> = ({ collapsed, onChangeSearchWord, onClickToggleButton }) => {
-  return (
-    <ListSubheader component="div">
-      <Toolbar>
-        <Box sx={{ display: "flex", alignItems: "flex-end", flexGrow: 1 }}>
-          <Search sx={{ my: 0.5, mr: 1 }} />
-          <Input placeholder="Search..." onChange={onChangeSearchWord} />
-        </Box>
-        <Button size="small" onClick={onClickToggleButton}>
-          {collapsed ? "Open" : "Close"} All
-        </Button>
-      </Toolbar>
-      <Divider />
-    </ListSubheader>
-  );
-};
-
-function SongListAll() {
-  const [searchWord, setSearchWord] = useState("");
-  const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
-  useDebounce(() => setDebouncedSearchWord(searchWord), 300, [searchWord]);
-
-  const [collapsed, setCollapsed] = useState(false);
-
-  const subheader = SongListSubHeader({
-    collapsed,
-    onChangeSearchWord: (e) => setSearchWord(e.currentTarget.value),
-    onClickToggleButton: () => setCollapsed(!collapsed),
-  });
-  return (
-    <List component="nav" dense subheader={subheader}>
-      <SongList
-        data={data}
-        filter={debouncedSearchWord}
-        collapsed={collapsed}
-      />
+const TopPage: React.FC = () => (
+  <Container maxWidth="sm" sx={{ pt: 2 }}>
+    <Typography variant="h1">Top Page</Typography>
+    <List>
+      <ListItemButton>
+        <Link to="/">TOP</Link>
+      </ListItemButton>
+      <ListItemButton>
+        <Link to="/songs">Song List</Link>
+      </ListItemButton>
     </List>
-  );
-}
+  </Container>
+);
+
+const NotFoundPage: React.FC = () => (
+  <Typography variant="h2" sx={{ pt: 2 }}>
+    There's nothing here!
+  </Typography>
+);
 
 function App() {
   return (
@@ -75,11 +45,13 @@ function App() {
         </Toolbar>
       </AppBar>
       <main>
-        <Container maxWidth="sm" sx={{ pt: 2 }}>
-          <Paper elevation={3}>
-            <SongListAll />
-          </Paper>
-        </Container>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<TopPage />} />
+            <Route path="/songs" element={<SongPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </BrowserRouter>
       </main>
     </div>
   );
