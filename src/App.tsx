@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import {
   AppBar,
+  Button,
   List,
   ListItemButton,
   Toolbar,
@@ -33,15 +34,43 @@ const NotFoundPage: React.FC = () => (
   </Typography>
 );
 
+interface User {
+  username: string;
+}
+
 function App() {
+  const [user, setUser] = useState<null | User>(null);
+
+  function handleLogin() {
+    setUser({ username: "naca-nyan" });
+  }
+
+  function handleLogout() {
+    setUser(null);
+  }
+
   return (
     <div className="App">
       <AppBar position="relative">
         <Toolbar>
           <LibraryMusic sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-          <Typography variant="h6" color="inherit" noWrap>
+          <Typography
+            variant="h6"
+            color="inherit"
+            noWrap
+            sx={{ display: "flex", flexGrow: 1 }}
+          >
             なかんにゃの知っとる曲
           </Typography>
+          {user === null ? (
+            <Button color="inherit" onClick={handleLogin}>
+              Log in
+            </Button>
+          ) : (
+            <Button color="inherit" onClick={handleLogout}>
+              Log out
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
       <main>
