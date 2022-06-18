@@ -1,5 +1,4 @@
 import React, { ChangeEventHandler, MouseEventHandler, useState } from "react";
-import "./App.css";
 import {
   Box,
   Button,
