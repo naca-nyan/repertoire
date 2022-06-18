@@ -15,12 +15,7 @@ import { LibraryMusic } from "@mui/icons-material";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import SongPage from "./SongPage";
 import { auth, provider } from "./firebase";
-import {
-  getRedirectResult,
-  signInWithRedirect,
-  signOut,
-  User,
-} from "firebase/auth";
+import { signInWithRedirect, signOut, User } from "firebase/auth";
 
 const TopPage: React.FC<{ user: User | null }> = ({ user }) => (
   <Container maxWidth="sm" sx={{ pt: 2 }}>
@@ -55,26 +50,11 @@ function App() {
   }
 
   auth.onAuthStateChanged((user) => {
-    setLoading(false);
-    setUser(user);
+    if (user) {
+      setLoading(false);
+      setUser(user);
+    }
   });
-
-  function fetchLogin() {
-    if (!loading) return;
-    getRedirectResult(auth)
-      .then((result) => {
-        const user = result?.user;
-        console.log(user);
-        setLoading(false);
-        if (user) setUser(user);
-      })
-      .catch((error) => {
-        console.warn(error);
-        setLoading(false);
-      });
-  }
-
-  fetchLogin();
 
   return (
     <div className="App">
