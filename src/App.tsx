@@ -4,31 +4,17 @@ import {
   Avatar,
   Button,
   CircularProgress,
-  List,
-  ListItemButton,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { Container } from "@mui/system";
 import { LibraryMusic } from "@mui/icons-material";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import SongPage from "./SongPage";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithRedirect, signOut, User } from "firebase/auth";
 
-const TopPage: React.FC<{ user: User | null }> = ({ user }) => (
-  <Container maxWidth="sm" sx={{ pt: 2 }}>
-    {user && <Typography variant="h5">Hello, {user.displayName}!</Typography>}
-    <List>
-      <ListItemButton>
-        <Link to="/">TOP</Link>
-      </ListItemButton>
-      <ListItemButton>
-        <Link to="/songs">Song List</Link>
-      </ListItemButton>
-    </List>
-  </Container>
-);
+import TopPage from "./pages/TopPage";
+import SongPage from "./SongPage";
 
 const NotFoundPage: React.FC = () => (
   <Typography variant="h2" sx={{ pt: 2 }}>
@@ -90,7 +76,7 @@ function App() {
       <main>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<TopPage user={user} />} />
+            <Route path="/" element={<TopPage />} />
             <Route path="/songs" element={<SongPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
