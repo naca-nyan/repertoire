@@ -58,32 +58,34 @@ function App() {
   return (
     <div className="App">
       <AppBar position="relative">
-        <Toolbar>
-          <LibraryMusic sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-          <Typography
-            variant="h6"
-            color="inherit"
-            noWrap
-            sx={{ display: "flex", flexGrow: 1 }}
-          >
-            Repertoire
-          </Typography>
-          {loading ? (
-            <CircularProgress color="inherit" />
-          ) : user === null ? (
-            <Button color="inherit" onClick={handleLogin}>
-              Log in
-            </Button>
-          ) : (
-            <Button color="inherit" onClick={handleLogout}>
-              {user.photoURL ? (
-                <Avatar alt={user.displayName ?? ""} src={user.photoURL} />
-              ) : (
-                <Avatar>{(user.displayName ?? "")[0]}</Avatar>
-              )}
-            </Button>
-          )}
-        </Toolbar>
+        <Container maxWidth="lg">
+          <Toolbar>
+            <LibraryMusic sx={{ display: "flex", mr: 1 }} />
+            <Typography
+              variant="h6"
+              color="inherit"
+              noWrap
+              sx={{ display: "flex", flexGrow: 1 }}
+            >
+              Repertoire
+            </Typography>
+            {loading ? (
+              <CircularProgress color="inherit" />
+            ) : user === null ? (
+              <Button color="inherit" onClick={handleLogin}>
+                Log in
+              </Button>
+            ) : (
+              <Button color="inherit" onClick={handleLogout}>
+                {user.photoURL ? (
+                  <Avatar alt={user.displayName ?? ""} src={user.photoURL} />
+                ) : (
+                  <Avatar>{(user.displayName ?? "")[0]}</Avatar>
+                )}
+              </Button>
+            )}
+          </Toolbar>
+        </Container>
       </AppBar>
       <main>
         <BrowserRouter>
