@@ -2,21 +2,29 @@ import React, { useState } from "react";
 import "./App.css";
 import {
   AppBar,
+  Avatar,
   Button,
+  CircularProgress,
   List,
   ListItemButton,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { Container } from "@mui/system";
-
 import { LibraryMusic } from "@mui/icons-material";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import SongPage from "./SongPage";
+import { auth, provider } from "./firebase";
+import {
+  getRedirectResult,
+  signInWithRedirect,
+  signOut,
+  User,
+} from "firebase/auth";
 
-const TopPage: React.FC = () => (
+const TopPage: React.FC<{ user: User | null }> = ({ user }) => (
   <Container maxWidth="sm" sx={{ pt: 2 }}>
-    <Typography variant="h1">Top Page</Typography>
+    {user && <Typography variant="h5">Hello, {user.displayName}!</Typography>}
     <List>
       <ListItemButton>
         <Link to="/">TOP</Link>
@@ -34,20 +42,39 @@ const NotFoundPage: React.FC = () => (
   </Typography>
 );
 
-interface User {
-  username: string;
-}
-
 function App() {
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<null | User>(null);
 
   function handleLogin() {
-    setUser({ username: "naca-nyan" });
+    signInWithRedirect(auth, provider);
   }
 
   function handleLogout() {
-    setUser(null);
+    signOut(auth).then(() => setUser(null));
   }
+
+  auth.onAuthStateChanged((user) => {
+    setLoading(false);
+    setUser(user);
+  });
+
+  function fetchLogin() {
+    if (!loading) return;
+    getRedirectResult(auth)
+      .then((result) => {
+        const user = result?.user;
+        console.log(user);
+        setLoading(false);
+        if (user) setUser(user);
+      })
+      .catch((error) => {
+        console.warn(error);
+        setLoading(false);
+      });
+  }
+
+  fetchLogin();
 
   return (
     <div className="App">
@@ -60,15 +87,21 @@ function App() {
             noWrap
             sx={{ display: "flex", flexGrow: 1 }}
           >
-            なかんにゃの知っとる曲
+            Repertoire
           </Typography>
-          {user === null ? (
+          {loading ? (
+            <CircularProgress color="inherit" />
+          ) : user === null ? (
             <Button color="inherit" onClick={handleLogin}>
               Log in
             </Button>
           ) : (
             <Button color="inherit" onClick={handleLogout}>
-              Log out
+              {user.photoURL ? (
+                <Avatar alt={user.displayName ?? ""} src={user.photoURL} />
+              ) : (
+                <Avatar>{(user.displayName ?? "")[0]}</Avatar>
+              )}
             </Button>
           )}
         </Toolbar>
@@ -76,7 +109,7 @@ function App() {
       <main>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<TopPage />} />
+            <Route path="/" element={<TopPage user={user} />} />
             <Route path="/songs" element={<SongPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
