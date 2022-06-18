@@ -4,6 +4,9 @@ import {
   Avatar,
   Button,
   CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -15,12 +18,51 @@ import { signInWithRedirect, signOut, User } from "firebase/auth";
 
 import TopPage from "./pages/TopPage";
 import SongPage from "./SongPage";
+import MyPage from "./pages/MyPage";
 
 const NotFoundPage: React.FC = () => (
   <Typography variant="h2" sx={{ pt: 2 }}>
     There's nothing here!
   </Typography>
 );
+
+const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
+  user,
+  handleLogout,
+}) => {
+  const photoURL = user.photoURL;
+  const name = user.displayName ?? "Anonymous";
+
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+  return (
+    <>
+      <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+        {photoURL ? (
+          <Avatar alt={name} src={photoURL} />
+        ) : (
+          <Avatar alt={name}>{name[0]}</Avatar>
+        )}
+      </IconButton>
+      <Menu
+        anchorEl={anchorElUser}
+        open={Boolean(anchorElUser)}
+        onClose={handleCloseUserMenu}
+        keepMounted
+      >
+        <MenuItem>
+          <a href="/mypage">Mypage</a>
+        </MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
+    </>
+  );
+};
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -35,10 +77,8 @@ function App() {
   }
 
   auth.onAuthStateChanged((user) => {
-    if (user) {
-      setLoading(false);
-      setUser(user);
-    }
+    setLoading(false);
+    setUser(user);
   });
 
   return (
@@ -48,10 +88,12 @@ function App() {
           <Toolbar>
             <LibraryMusic sx={{ display: "flex", mr: 1 }} />
             <Typography
+              component="a"
+              href="/"
               variant="h6"
               color="inherit"
               noWrap
-              sx={{ display: "flex", flexGrow: 1 }}
+              sx={{ textDecoration: "none", display: "flex", flexGrow: 1 }}
             >
               Repertoire
             </Typography>
@@ -62,13 +104,7 @@ function App() {
                 Log in
               </Button>
             ) : (
-              <Button color="inherit" onClick={handleLogout}>
-                {user.photoURL ? (
-                  <Avatar alt={user.displayName ?? ""} src={user.photoURL} />
-                ) : (
-                  <Avatar>{(user.displayName ?? "")[0]}</Avatar>
-                )}
-              </Button>
+              <AvatarMenu user={user} handleLogout={handleLogout} />
             )}
           </Toolbar>
         </Container>
@@ -78,6 +114,7 @@ function App() {
           <Routes>
             <Route path="/" element={<TopPage />} />
             <Route path="/songs" element={<SongPage />} />
+            <Route path="/mypage" element={<MyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
