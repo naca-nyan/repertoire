@@ -19,12 +19,7 @@ import { signInWithRedirect, signOut, User } from "firebase/auth";
 import TopPage from "./pages/TopPage";
 import SongPage from "./SongPage";
 import MyPage from "./pages/MyPage";
-
-const NotFoundPage: React.FC = () => (
-  <Typography variant="h2" sx={{ pt: 2 }}>
-    There's nothing here!
-  </Typography>
-);
+import NotFoundPage from "./pages/NotFoundPage";
 
 const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
   user,
@@ -65,8 +60,11 @@ const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
 };
 
 function App() {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<null | User>(null);
+  // Sign in state
+  // undefined: not determined
+  // null: signed out
+  // User: signed in as the user
+  const [user, setUser] = useState<undefined | null | User>(undefined);
 
   function handleLogin() {
     signInWithRedirect(auth, provider);
@@ -77,7 +75,6 @@ function App() {
   }
 
   auth.onAuthStateChanged((user) => {
-    setLoading(false);
     setUser(user);
   });
 
@@ -101,7 +98,7 @@ function App() {
                   Repertoire
                 </Typography>
               </Link>
-              {loading ? (
+              {user === undefined ? (
                 <CircularProgress color="inherit" />
               ) : user === null ? (
                 <Button color="inherit" onClick={handleLogin}>
@@ -117,7 +114,7 @@ function App() {
           <Routes>
             <Route path="/" element={<TopPage />} />
             <Route path="/songs" element={<SongPage />} />
-            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/mypage" element={<MyPage user={user} />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
