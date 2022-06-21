@@ -4,9 +4,9 @@ import { Container } from "@mui/system";
 import { User } from "firebase/auth";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
-import { Song } from "../song";
-import SongList from "../SongList";
-import SongSubmitForm from "../SongSubmitForm";
+import { Song } from "../data/song";
+import SongList from "../components/SongList";
+import SongSubmitForm from "../components/SongSubmitForm";
 import { onValue, ref, set } from "firebase/database";
 import { database } from "../firebase";
 

@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import { Container } from "@mui/system";
 
-import data from "./data.json";
-import SongList from "./SongList";
+import data from "../data.json";
+import SongList from "../components/SongList";
 import { Search } from "@mui/icons-material";
 import { useDebounce } from "react-use";
 

@@ -2,7 +2,7 @@ import React, { ChangeEventHandler, useState } from "react";
 import { Add, Close } from "@mui/icons-material";
 import { Button, Fab, Fade, IconButton, Modal, TextField } from "@mui/material";
 import { Box } from "@mui/system";
-import { Song } from "./song";
+import { Song } from "../data/song";
 
 const boxStyle = {
   position: "absolute",

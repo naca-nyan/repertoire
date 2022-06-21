@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
-import { Song, uniqByArtist } from "./song";
+import { Song, uniqByArtist } from "../data/song";
 
 function labelURL(url: string): string {
   let label = "";

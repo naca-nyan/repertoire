@@ -5,7 +5,7 @@ import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import App from "./App";
 import TopPage from "./pages/TopPage";
-import SongPage from "./SongPage";
+import SongPage from "./pages/SongPage";
 import MyPage from "./pages/MyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
