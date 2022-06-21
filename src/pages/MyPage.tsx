@@ -17,6 +17,7 @@ import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import ErrorPage from "./ErrorPage";
 import { Share } from "@mui/icons-material";
+import { getScreenName } from "../data/user";
 
 const MyPage: React.FC = () => {
   const us = useContext(UserStateContext);
@@ -30,10 +31,7 @@ const MyPage: React.FC = () => {
   }
 
   const user = us.user;
-
-  // FIXME: safe method to get screen name
-  // @ts-ignore
-  const userId: string | undefined = user.reloadUserInfo?.screenName;
+  const userId = getScreenName(user);
   if (!userId) {
     return <ErrorPage />;
   }
