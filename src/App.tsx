@@ -51,7 +51,7 @@ const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
         keepMounted
       >
         <Link to="/mypage" style={{ color: "black", textDecoration: "none" }}>
-          <MenuItem>Mypage</MenuItem>
+          <MenuItem onClick={handleCloseUserMenu}>Mypage</MenuItem>
         </Link>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
