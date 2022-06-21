@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   AppBar,
   Avatar,
@@ -13,12 +13,12 @@ import {
 import { Container } from "@mui/system";
 import { LibraryMusic } from "@mui/icons-material";
 import { Link, Outlet } from "react-router-dom";
-import { auth, provider } from "./firebase";
-import { signInWithRedirect, signOut, User } from "firebase/auth";
+import { User } from "firebase/auth";
+import { UserStateContext } from "./contexts/user";
 
-const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
+const AvatarMenu: React.FC<{ user: User; signOut: () => void }> = ({
   user,
-  handleLogout,
+  signOut,
 }) => {
   const photoURL = user.photoURL;
   const name = user.displayName ?? "Anonymous";
@@ -48,30 +48,14 @@ const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
         <Link to="/mypage" style={{ color: "black", textDecoration: "none" }}>
           <MenuItem onClick={handleCloseUserMenu}>Mypage</MenuItem>
         </Link>
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        <MenuItem onClick={signOut}>Logout</MenuItem>
       </Menu>
     </>
   );
 };
 
 function App() {
-  // Sign in state
-  // undefined: not determined
-  // null: signed out
-  // User: signed in as the user
-  const [user, setUser] = useState<undefined | null | User>(undefined);
-
-  function handleLogin() {
-    signInWithRedirect(auth, provider);
-  }
-
-  function handleLogout() {
-    signOut(auth).then(() => setUser(null));
-  }
-
-  auth.onAuthStateChanged((user) => {
-    setUser(user);
-  });
+  const us = useContext(UserStateContext);
 
   return (
     <div className="App">
@@ -92,14 +76,14 @@ function App() {
                 Repertoire
               </Typography>
             </Link>
-            {user === undefined ? (
+            {us.state === "loading" ? (
               <CircularProgress color="inherit" />
-            ) : user === null ? (
-              <Button color="inherit" onClick={handleLogin}>
+            ) : us.state === "signed out" ? (
+              <Button color="inherit" onClick={us.signIn}>
                 Log in
               </Button>
             ) : (
-              <AvatarMenu user={user} handleLogout={handleLogout} />
+              <AvatarMenu user={us.user} signOut={us.signOut} />
             )}
           </Toolbar>
         </Container>

@@ -1,27 +1,25 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Box, Button, List, Typography } from "@mui/material";
 import { Container } from "@mui/system";
-import { User } from "firebase/auth";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import { getSongs, setSongs, Song } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
+import { UserStateContext } from "../contexts/user";
 
-interface Props {
-  user?: User | null;
-}
-
-const MyPage: React.FC<Props> = ({ user }) => {
+const MyPage: React.FC = () => {
+  const us = useContext(UserStateContext);
   const [data, setData] = useState<undefined | Song[]>(undefined);
 
-  if (user === undefined) {
+  if (us.state === "loading") {
     return <LoadingPage />;
   }
-  if (user === null) {
+  if (us.state === "signed out") {
     return <NotFoundPage />;
   }
 
+  const user = us.user;
   // @ts-ignore
   const userId: string | undefined = user.reloadUserInfo?.screenName;
   if (!userId) {
