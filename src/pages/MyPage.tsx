@@ -1,7 +1,13 @@
 import React, { useContext, useState } from "react";
-import { Box, Button, List, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  List,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Container } from "@mui/system";
-import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import { getSongs, setSongs, Song } from "../data/song";
 import SongList from "../components/SongList";
@@ -9,6 +15,7 @@ import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import ErrorPage from "./ErrorPage";
+import { Share } from "@mui/icons-material";
 
 const MyPage: React.FC = () => {
   const us = useContext(UserStateContext);
@@ -50,11 +57,22 @@ const MyPage: React.FC = () => {
     setSongs(userId, songs);
   }
 
+  const shareURL = window.location.origin + "/users/" + userId;
+
+  function copyShareURL() {
+    navigator.clipboard.writeText(shareURL);
+  }
+
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h5">
           {user.displayName}の知ってる曲リスト
+          <Tooltip title={shareURL}>
+            <IconButton onClick={copyShareURL} sx={{ ml: 1 }}>
+              <Share />
+            </IconButton>
+          </Tooltip>
         </Typography>
         <Button onClick={handleSave} variant="contained">
           Save
