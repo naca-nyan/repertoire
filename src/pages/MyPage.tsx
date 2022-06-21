@@ -4,6 +4,7 @@ import {
   Button,
   IconButton,
   List,
+  Paper,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -78,9 +79,11 @@ const MyPage: React.FC = () => {
           Save
         </Button>
       </Box>
-      <List component="nav" dense>
-        <SongList data={data} filter="" collapsed={false} />
-      </List>
+      <Paper elevation={3} sx={{ mt: 2 }}>
+        <List component="nav" dense>
+          <SongList data={data} filter="" collapsed={false} />
+        </List>
+      </Paper>
       <SongSubmitForm onAddSong={(song) => setData([...data, song])} />
     </Container>
   );

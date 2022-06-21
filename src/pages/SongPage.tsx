@@ -41,7 +41,7 @@ const SongListSubHeader: React.FC<{
   );
 };
 
-const SongListAll: React.FC<{ data: Song[] }> = ({ data }) => {
+const SongListWithSearchBar: React.FC<{ data: Song[] }> = ({ data }) => {
   const [searchWord, setSearchWord] = useState("");
   const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
   useDebounce(() => setDebouncedSearchWord(searchWord), 300, [searchWord]);
@@ -54,13 +54,15 @@ const SongListAll: React.FC<{ data: Song[] }> = ({ data }) => {
     onClickToggleButton: () => setCollapsed(!collapsed),
   });
   return (
-    <List component="nav" dense subheader={subheader}>
-      <SongList
-        data={data}
-        filter={debouncedSearchWord}
-        collapsed={collapsed}
-      />
-    </List>
+    <Paper elevation={3} sx={{ mt: 2 }}>
+      <List component="nav" dense subheader={subheader}>
+        <SongList
+          data={data}
+          filter={debouncedSearchWord}
+          collapsed={collapsed}
+        />
+      </List>
+    </Paper>
   );
 };
 
@@ -77,13 +79,9 @@ const SongPage: React.FC = () => {
     return <NotFoundPage />;
   }
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h6" sx={{ m: 2 }}>
-        @{userId} さんの知ってる曲
-      </Typography>
-      <Paper elevation={3}>
-        <SongListAll data={data} />
-      </Paper>
+    <Container maxWidth="sm" sx={{ mt: 3 }}>
+      <Typography variant="h6">@{userId} さんの知ってる曲</Typography>
+      <SongListWithSearchBar data={data} />
     </Container>
   );
 };
