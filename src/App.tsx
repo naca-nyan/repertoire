@@ -12,14 +12,9 @@ import {
 } from "@mui/material";
 import { Container } from "@mui/system";
 import { LibraryMusic } from "@mui/icons-material";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { auth, provider } from "./firebase";
 import { signInWithRedirect, signOut, User } from "firebase/auth";
-
-import TopPage from "./pages/TopPage";
-import SongPage from "./SongPage";
-import MyPage from "./pages/MyPage";
-import NotFoundPage from "./pages/NotFoundPage";
 
 const AvatarMenu: React.FC<{ user: User; handleLogout: () => void }> = ({
   user,
@@ -80,45 +75,38 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserRouter>
-        <AppBar position="relative">
-          <Container maxWidth="lg">
-            <Toolbar>
-              <LibraryMusic sx={{ display: "flex", mr: 1 }} />
-              <Link
-                to="/"
-                style={{
-                  color: "white",
-                  textDecoration: "none",
-                  display: "flex",
-                  flexGrow: 1,
-                }}
-              >
-                <Typography variant="h6" noWrap>
-                  Repertoire
-                </Typography>
-              </Link>
-              {user === undefined ? (
-                <CircularProgress color="inherit" />
-              ) : user === null ? (
-                <Button color="inherit" onClick={handleLogin}>
-                  Log in
-                </Button>
-              ) : (
-                <AvatarMenu user={user} handleLogout={handleLogout} />
-              )}
-            </Toolbar>
-          </Container>
-        </AppBar>
-        <main>
-          <Routes>
-            <Route path="/" element={<TopPage />} />
-            <Route path="/songs" element={<SongPage />} />
-            <Route path="/mypage" element={<MyPage user={user} />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </main>
-      </BrowserRouter>
+      <AppBar position="relative">
+        <Container maxWidth="lg">
+          <Toolbar>
+            <LibraryMusic sx={{ display: "flex", mr: 1 }} />
+            <Link
+              to="/"
+              style={{
+                color: "white",
+                textDecoration: "none",
+                display: "flex",
+                flexGrow: 1,
+              }}
+            >
+              <Typography variant="h6" noWrap>
+                Repertoire
+              </Typography>
+            </Link>
+            {user === undefined ? (
+              <CircularProgress color="inherit" />
+            ) : user === null ? (
+              <Button color="inherit" onClick={handleLogin}>
+                Log in
+              </Button>
+            ) : (
+              <AvatarMenu user={user} handleLogout={handleLogout} />
+            )}
+          </Toolbar>
+        </Container>
+      </AppBar>
+      <main>
+        <Outlet />
+      </main>
     </div>
   );
 }
