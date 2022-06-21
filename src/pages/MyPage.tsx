@@ -9,14 +9,8 @@ import SongList from "../SongList";
 import SongSubmitForm from "../SongSubmitForm";
 
 async function getMySongs(): Promise<Song[]> {
-  return [
-    {
-      artist: "test artist",
-      title: "test title",
-      url: "http://example.com/",
-      comment: "this is a test",
-    },
-  ];
+  const { default: data } = await import("../data.json");
+  return data;
 }
 
 interface Props {
@@ -42,7 +36,7 @@ const MyPage: React.FC<Props> = ({ user }) => {
       <List component="nav" dense>
         <SongList data={data} filter="" collapsed={false} />
       </List>
-      <SongSubmitForm />
+      <SongSubmitForm onAddSong={(song) => setData([...data, song])} />
     </Container>
   );
 };
