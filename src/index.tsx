@@ -18,9 +18,9 @@ root.render(
       <Routes>
         <Route path="/" element={<App />}>
           <Route path="" element={<TopPage />} />
-          <Route path="songs" element={<SongPage />} />
+          <Route path="users/:userId" element={<SongPage />} />
           {/* TODO: MyPage does not work. Use Context */}
-          <Route path="mypage" element={<MyPage user={null} />} />
+          <Route path="mypage" element={<MyPage user={undefined} />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

@@ -4,31 +4,9 @@ import { Container } from "@mui/system";
 import { User } from "firebase/auth";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
-import { Song } from "../data/song";
+import { getSongs, setSongs, Song } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
-import { onValue, ref, set } from "firebase/database";
-import { database } from "../firebase";
-
-const songPath = (userId: string) => `/users/${userId}/songs/`;
-
-function getSongs(userId: string): Promise<Song[]> {
-  return new Promise((resolve, reject) => {
-    onValue(
-      ref(database, songPath(userId)),
-      (snapshot) => {
-        const songs = snapshot.val() || [];
-        resolve(songs);
-      },
-      (error) => reject(error),
-      { onlyOnce: true }
-    );
-  });
-}
-
-async function setSongs(userId: string, songs: Song[]) {
-  await set(ref(database, songPath(userId)), songs);
-}
 
 interface Props {
   user?: User | null;
@@ -51,7 +29,13 @@ const MyPage: React.FC<Props> = ({ user }) => {
   }
 
   if (data === undefined) {
-    getSongs(userId).then((data) => setData(data));
+    getSongs(userId).then((data) => {
+      if (data === null) {
+        console.warn("fetched data null; fall back to []");
+      }
+      const songs = data ?? [];
+      setData(songs);
+    });
     return <LoadingPage />;
   }
 

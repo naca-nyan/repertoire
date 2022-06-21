@@ -1,3 +1,6 @@
+import { onValue, ref, set } from "firebase/database";
+import { database } from "../firebase";
+
 export interface Song {
   artist: string;
   title: string;
@@ -35,4 +38,24 @@ export function uniqByArtist(songs: Song[]): SongsUniqByArtist {
     artist,
     songs: songs.filter((song) => song.artist === artist).map(omitArtist),
   }));
+}
+
+const songPath = (userId: string) => `/users/${userId}/songs/`;
+
+export function getSongs(userId: string): Promise<Song[] | null> {
+  return new Promise((resolve, reject) => {
+    onValue(
+      ref(database, songPath(userId)),
+      (snapshot) => {
+        const songs = snapshot.val();
+        resolve(songs);
+      },
+      (error) => reject(error),
+      { onlyOnce: true }
+    );
+  });
+}
+
+export async function setSongs(userId: string, songs: Song[]) {
+  await set(ref(database, songPath(userId)), songs);
 }
