@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
-import { Song, songMap } from "./song";
+import { Song, uniqByArtist } from "./song";
 
 function labelURL(url: string): string {
   let label = "";
@@ -21,7 +21,7 @@ function labelURL(url: string): string {
 
 const SongListItem: React.FC<{
   artist: string;
-  songs: Song[];
+  songs: Omit<Song, "artist">[];
   open?: boolean;
 }> = (props) => {
   const { artist, songs } = props;
@@ -80,12 +80,16 @@ const SongList: React.FC<{
   collapsed: boolean;
 }> = React.memo(({ data, filter, collapsed }) => {
   const filtered = filter ? data.filter(songIncludes(filter)) : data;
-  const songsOf = songMap(filtered);
-  const sorted = Array.from(songsOf.entries());
+  const uniq = uniqByArtist(filtered);
   return (
     <>
-      {sorted.map(([k, v]) => (
-        <SongListItem key={k} artist={k} songs={v} open={!collapsed} />
+      {uniq.map(({ artist, songs }) => (
+        <SongListItem
+          key={artist}
+          artist={artist}
+          songs={songs}
+          open={!collapsed}
+        />
       ))}
     </>
   );

@@ -5,7 +5,7 @@ export interface Song {
   comment?: string;
 }
 
-function makeSong(obj: Partial<Song>): Song {
+export function unpartial(obj: Partial<Song>): Song {
   return {
     artist: obj.artist ?? "",
     title: obj.title ?? "",
@@ -14,12 +14,25 @@ function makeSong(obj: Partial<Song>): Song {
   };
 }
 
-export function songMap(data: Song[]): Map<string, Song[]> {
-  const map = data.reduce((map, obj) => {
-    const song = makeSong(obj);
-    const songs = map.get(song.artist) ?? [];
-    map.set(song.artist, [...songs, song]);
-    return map;
-  }, new Map());
-  return map;
+export type SongsUniqByArtist = {
+  artist: string;
+  songs: Omit<Song, "artist">[];
+}[];
+
+function omitArtist(song: Song): Omit<Song, "artist"> {
+  const { title, url, comment } = song;
+  return {
+    title,
+    url,
+    comment,
+  };
+}
+
+export function uniqByArtist(songs: Song[]): SongsUniqByArtist {
+  const uniq = (xs: string[]) => Array.from(new Set(xs));
+  const artists = uniq(songs.map(({ artist }) => artist));
+  return artists.map((artist) => ({
+    artist,
+    songs: songs.filter((song) => song.artist === artist).map(omitArtist),
+  }));
 }
