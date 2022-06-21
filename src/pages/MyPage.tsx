@@ -20,6 +20,8 @@ const MyPage: React.FC = () => {
   }
 
   const user = us.user;
+
+  // FIXME: safe method to get screen name
   // @ts-ignore
   const userId: string | undefined = user.reloadUserInfo?.screenName;
   if (!userId) {
