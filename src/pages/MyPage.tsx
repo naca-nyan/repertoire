@@ -7,6 +7,8 @@ import { getSongs, setSongs, Song } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
+import UnauthorizedPage from "./UnauthorizedPage";
+import ErrorPage from "./ErrorPage";
 
 const MyPage: React.FC = () => {
   const us = useContext(UserStateContext);
@@ -16,7 +18,7 @@ const MyPage: React.FC = () => {
     return <LoadingPage />;
   }
   if (us.state === "signed out") {
-    return <NotFoundPage />;
+    return <UnauthorizedPage />;
   }
 
   const user = us.user;
@@ -25,7 +27,7 @@ const MyPage: React.FC = () => {
   // @ts-ignore
   const userId: string | undefined = user.reloadUserInfo?.screenName;
   if (!userId) {
-    return <NotFoundPage />;
+    return <ErrorPage />;
   }
 
   if (data === undefined) {
