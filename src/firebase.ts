@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, TwitterAuthProvider } from "firebase/auth";
+import { getDatabase } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -10,6 +11,8 @@ import { getAuth, TwitterAuthProvider } from "firebase/auth";
 const firebaseConfig = {
   apiKey: "AIzaSyDv2k8ZKmMEZeekgd_YGzCmVo1sIzGeglg",
   authDomain: "syncroom-repertoire.firebaseapp.com",
+  databaseURL:
+    "https://syncroom-repertoire-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "syncroom-repertoire",
   storageBucket: "syncroom-repertoire.appspot.com",
   messagingSenderId: "993193622593",
@@ -22,3 +25,4 @@ export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth();
 export const provider = new TwitterAuthProvider();
+export const database = getDatabase();
