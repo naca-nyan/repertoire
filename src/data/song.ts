@@ -1,11 +1,15 @@
-import { onValue, ref, set } from "firebase/database";
-import { database } from "../firebase";
+import { child, onValue, push, ref, update } from "firebase/database";
+import { database as db } from "../firebase";
 
 export interface Song {
   artist: string;
   title: string;
   url: string;
   comment?: string;
+}
+
+export interface Songs {
+  [songId: string]: Song;
 }
 
 function isSong(x: any): x is Song {
@@ -27,37 +31,22 @@ export function unpartial(obj: Partial<Song>): Song {
 }
 
 export type SongsUniqByArtist = {
-  artist: string;
-  songs: Omit<Song, "artist">[];
-}[];
+  [artist: string]: Songs;
+};
 
-function omitArtist(song: Song): Omit<Song, "artist"> {
-  const { title, url, comment } = song;
-  return {
-    title,
-    url,
-    comment,
-  };
+export function uniqByArtist(songs: Songs): SongsUniqByArtist {
+  const artists: { [artist: string]: Songs } = {};
+  for (const [songId, song] of Object.entries(songs)) {
+    const songsOfTheArtist = artists[song.artist];
+    artists[song.artist] = { ...songsOfTheArtist, [songId]: song };
+  }
+  return artists;
 }
 
-export function uniqByArtist(songs: Song[]): SongsUniqByArtist {
-  const uniq = (xs: string[]) => Array.from(new Set(xs));
-  const artists = uniq(songs.map(({ artist }) => artist));
-  return artists.map((artist) => ({
-    artist,
-    songs: songs.filter((song) => song.artist === artist).map(omitArtist),
-  }));
-}
-
-function isIterable(obj: any) {
-  if (obj == null) return false;
-  return typeof obj[Symbol.iterator] === "function";
-}
-
-function getValueOnce(path: string): Promise<any[]> {
+function getValueOnce(path: string): Promise<any> {
   return new Promise((resolve, reject) => {
     onValue(
-      ref(database, path),
+      ref(db, path),
       (snapshot) => resolve(snapshot.val()),
       (error) => reject(error),
       { onlyOnce: true }
@@ -65,17 +54,33 @@ function getValueOnce(path: string): Promise<any[]> {
   });
 }
 
-const songPath = (userId: string) => `/users/${userId}/songs/`;
-
-export async function getSongs(userId: string): Promise<Song[]> {
-  const val = await getValueOnce(songPath(userId));
-  if (!isIterable(val)) {
-    throw new Error("value is not iterable");
-  }
-  const songs = Array.from(val).filter(isSong);
-  return songs;
+async function getAllSongs(): Promise<Songs> {
+  const val = await getValueOnce(`/songs/`);
+  if (!Object.values(val).every(isSong))
+    throw new Error("Type validation failed: a value of songs is not song");
+  return val;
 }
 
-export async function setSongs(userId: string, songs: Song[]) {
-  await set(ref(database, songPath(userId)), songs);
+export async function getSongsOfUser(userId: string): Promise<Songs> {
+  const val = await getValueOnce(`/users/${userId}/songs/`);
+  if (!Object.values(val).every(isSong))
+    throw new Error("Type validation failed: a value of songs is not song");
+  return val;
+}
+
+export async function getSongs(userId?: string): Promise<Songs> {
+  if (userId === undefined) return await getAllSongs();
+  if (userId === "") throw new Error("invalid username");
+  return await getSongsOfUser(userId);
+}
+
+export async function pushSong(userId: string, song: Song): Promise<string> {
+  const key = push(child(ref(db), "songs")).key;
+  if (key === null) throw new Error("could not push song; key is null");
+  const updates = {
+    [`/songs/${key}`]: song,
+    [`/users/${userId}/songs/${key}`]: song,
+  };
+  await update(ref(db), updates);
+  return key;
 }

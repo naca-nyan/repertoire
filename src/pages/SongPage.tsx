@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
 
-import { getSongs, Song } from "../data/song";
+import { getSongs, Songs } from "../data/song";
 import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
@@ -46,7 +46,7 @@ const SongListSubHeader: React.FC<{
   );
 };
 
-const SongListWithSearchBar: React.FC<{ data: Song[] }> = ({ data }) => {
+const SongListWithSearchBar: React.FC<{ data: Songs }> = ({ data }) => {
   const [searchWord, setSearchWord] = useState("");
   const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
   useDebounce(() => setDebouncedSearchWord(searchWord), 300, [searchWord]);
@@ -73,7 +73,7 @@ const SongListWithSearchBar: React.FC<{ data: Song[] }> = ({ data }) => {
 
 const SongPage: React.FC = () => {
   const { userId } = useParams();
-  const [data, setData] = useState<undefined | null | Song[]>(undefined);
+  const [data, setData] = useState<undefined | null | Songs>(undefined);
 
   useEffect(() => {
     if (!userId) {
@@ -82,12 +82,21 @@ const SongPage: React.FC = () => {
     }
     getSongs(userId)
       .then(setData)
-      .catch(() => setData(null));
+      .catch((e) => {
+        console.warn(e);
+        setData(null);
+      });
   }, [userId]);
 
-  if (!userId) return <NotFoundPage />;
+  if (!userId) {
+    console.log("userid was falsy");
+    return <NotFoundPage />;
+  }
   if (data === undefined) return <LoadingPage />;
-  if (data === null) return <NotFoundPage />;
+  if (data === null) {
+    console.log("data was null");
+    return <NotFoundPage />;
+  }
 
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>

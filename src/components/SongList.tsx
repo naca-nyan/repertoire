@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
-import { Song, uniqByArtist } from "../data/song";
+import { Song, Songs, uniqByArtist } from "../data/song";
 
 function labelURL(url: string): string {
   let label = "";
@@ -21,7 +21,7 @@ function labelURL(url: string): string {
 
 const SongListItem: React.FC<{
   artist: string;
-  songs: Omit<Song, "artist">[];
+  songs: Songs;
   open?: boolean;
 }> = (props) => {
   const { artist, songs } = props;
@@ -38,7 +38,7 @@ const SongListItem: React.FC<{
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding dense>
-          {songs.map(({ url, title, comment }) => (
+          {Object.values(songs).map(({ url, title, comment }) => (
             <ListItemButton
               component="a"
               href={url}
@@ -74,16 +74,27 @@ function songIncludes(filter: string): (s: Song) => boolean {
   };
 }
 
+function filterSongs(songs: Songs, filter: string): Songs {
+  const newSongs: Songs = {};
+  const array = Object.entries(songs).filter(([songId, song]) =>
+    songIncludes(filter)(song)
+  );
+  array.forEach(([songId, song]) => {
+    newSongs[songId] = song;
+  });
+  return newSongs;
+}
+
 const SongList: React.FC<{
-  data: Song[];
+  data: Songs;
   filter: string;
   collapsed: boolean;
 }> = React.memo(({ data, filter, collapsed }) => {
-  const filtered = filter ? data.filter(songIncludes(filter)) : data;
+  const filtered = filter ? filterSongs(data, filter) : data;
   const uniq = uniqByArtist(filtered);
   return (
     <>
-      {uniq.map(({ artist, songs }) => (
+      {Object.entries(uniq).map(([artist, songs]) => (
         <SongListItem
           key={artist}
           artist={artist}

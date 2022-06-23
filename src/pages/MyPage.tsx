@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
-  Button,
   IconButton,
   List,
   Paper,
@@ -10,7 +9,7 @@ import {
 } from "@mui/material";
 import { Container } from "@mui/system";
 import LoadingPage from "./LoadingPage";
-import { getSongs, setSongs, Song } from "../data/song";
+import { getSongs, pushSong, Song, Songs } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
@@ -24,27 +23,24 @@ const MyPageContent: React.FC<{ user: User; userId: string }> = ({
   user,
   userId,
 }) => {
-  const [data, setData] = useState<undefined | Song[]>(undefined);
+  const [data, setData] = useState<undefined | Songs>(undefined);
   useEffect(() => {
     getSongs(userId)
       .then((songs) => setData(songs))
       .catch(() => {
-        console.warn("Failed to fetch songs; fallback to []");
-        setData([]);
+        console.warn("Failed to fetch songs; fallback to {}");
+        setData({});
       });
-  });
+  }, [userId]);
   if (data === undefined) {
     return <LoadingPage />;
   }
 
-  function handleSave() {
-    const songs = data;
-    if (!userId || songs === undefined) {
-      console.error("handleSave: cannot save", userId, songs);
-      return;
-    }
-    setSongs(userId, songs);
-  }
+  const onAddSong = (song: Song) => {
+    pushSong(userId, song)
+      .then((songId) => setData({ ...data, [songId]: song }))
+      .catch((e) => console.error("cannot push song", song, e));
+  };
 
   const shareURL = window.location.origin + "/users/" + userId;
 
@@ -63,16 +59,13 @@ const MyPageContent: React.FC<{ user: User; userId: string }> = ({
             </IconButton>
           </Tooltip>
         </Typography>
-        <Button onClick={handleSave} variant="contained">
-          Save
-        </Button>
       </Box>
       <Paper elevation={3} sx={{ mt: 2 }}>
         <List component="nav" dense>
           <SongList data={data} filter="" collapsed={false} />
         </List>
       </Paper>
-      <SongSubmitForm onAddSong={(song) => setData([...data, song])} />
+      <SongSubmitForm onAddSong={onAddSong} />
     </Container>
   );
 };
