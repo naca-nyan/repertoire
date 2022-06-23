@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -18,31 +18,22 @@ import UnauthorizedPage from "./UnauthorizedPage";
 import ErrorPage from "./ErrorPage";
 import { Share } from "@mui/icons-material";
 import { getScreenName } from "../data/user";
+import { User } from "firebase/auth";
 
-const MyPage: React.FC = () => {
-  const us = useContext(UserStateContext);
+const MyPageContent: React.FC<{ user: User; userId: string }> = ({
+  user,
+  userId,
+}) => {
   const [data, setData] = useState<undefined | Song[]>(undefined);
-
-  if (us.state === "loading") {
-    return <LoadingPage />;
-  }
-  if (us.state === "signed out") {
-    return <UnauthorizedPage />;
-  }
-
-  const user = us.user;
-  const userId = getScreenName(user);
-  if (!userId) {
-    return <ErrorPage />;
-  }
-
-  if (data === undefined) {
+  useEffect(() => {
     getSongs(userId)
       .then((songs) => setData(songs))
       .catch(() => {
         console.warn("Failed to fetch songs; fallback to []");
         setData([]);
       });
+  });
+  if (data === undefined) {
     return <LoadingPage />;
   }
 
@@ -84,6 +75,24 @@ const MyPage: React.FC = () => {
       <SongSubmitForm onAddSong={(song) => setData([...data, song])} />
     </Container>
   );
+};
+
+const MyPage: React.FC = () => {
+  const us = useContext(UserStateContext);
+  if (us.state === "loading") {
+    return <LoadingPage />;
+  }
+  if (us.state === "signed out") {
+    return <UnauthorizedPage />;
+  }
+
+  const user = us.user;
+  const userId = getScreenName(user);
+
+  if (!userId) {
+    return <ErrorPage />;
+  }
+  return <MyPageContent user={user} userId={userId} />;
 };
 
 export default MyPage;

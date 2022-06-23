@@ -1,4 +1,9 @@
-import React, { ChangeEventHandler, MouseEventHandler, useState } from "react";
+import React, {
+  ChangeEventHandler,
+  MouseEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
 import { useDebounce } from "react-use";
 import {
@@ -70,16 +75,20 @@ const SongPage: React.FC = () => {
   const { userId } = useParams();
   const [data, setData] = useState<undefined | null | Song[]>(undefined);
 
-  if (!userId) return <NotFoundPage />;
-  if (data === undefined) {
+  useEffect(() => {
+    if (!userId) {
+      setData(null);
+      return;
+    }
     getSongs(userId)
       .then(setData)
       .catch(() => setData(null));
-    return <LoadingPage />;
-  }
-  if (data === null) {
-    return <NotFoundPage />;
-  }
+  }, [userId]);
+
+  if (!userId) return <NotFoundPage />;
+  if (data === undefined) return <LoadingPage />;
+  if (data === null) return <NotFoundPage />;
+
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
       <Typography variant="h6">@{userId} さんの知ってる曲</Typography>

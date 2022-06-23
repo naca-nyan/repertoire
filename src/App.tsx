@@ -6,27 +6,26 @@ import MyPage from "./pages/MyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { defaultUserState, UserState, UserStateContext } from "./contexts/user";
 import { signInWithRedirect, signOut as authSignOut } from "firebase/auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { auth, provider } from "./firebase";
 
 const App: React.FC = () => {
   const [userState, setUserState] = useState<UserState>(defaultUserState);
 
-  function signIn() {
-    signInWithRedirect(auth, provider);
-  }
-
-  function signOut() {
-    authSignOut(auth).then(() => setUserState({ state: "signed out", signIn }));
-  }
-
-  auth.onAuthStateChanged((user) => {
-    const userState: UserState =
-      user === null
-        ? { state: "signed out", signIn }
-        : { state: "signed in", user, signOut };
-    setUserState(userState);
-  });
+  useEffect(() => {
+    const signIn = () => signInWithRedirect(auth, provider);
+    const signOut = () =>
+      authSignOut(auth).then(() =>
+        setUserState({ state: "signed out", signIn })
+      );
+    auth.onAuthStateChanged((user) => {
+      const userState: UserState =
+        user === null
+          ? { state: "signed out", signIn }
+          : { state: "signed in", user, signOut };
+      setUserState(userState);
+    });
+  }, []);
 
   return (
     <UserStateContext.Provider value={userState}>
