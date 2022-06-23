@@ -37,13 +37,12 @@ const MyPage: React.FC = () => {
   }
 
   if (data === undefined) {
-    getSongs(userId).then((data) => {
-      if (data === null) {
-        console.warn("fetched data null; fall back to []");
-      }
-      const songs = data ?? [];
-      setData(songs);
-    });
+    getSongs(userId)
+      .then((songs) => setData(songs))
+      .catch(() => {
+        console.warn("Failed to fetch songs; fallback to []");
+        setData([]);
+      });
     return <LoadingPage />;
   }
 

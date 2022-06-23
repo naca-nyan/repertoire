@@ -8,6 +8,15 @@ export interface Song {
   comment?: string;
 }
 
+function isSong(x: any): x is Song {
+  return (
+    typeof x.artist === "string" &&
+    typeof x.title === "string" &&
+    typeof x.url === "string" &&
+    ["string", "undefined"].includes(typeof x.comment)
+  );
+}
+
 export function unpartial(obj: Partial<Song>): Song {
   return {
     artist: obj.artist ?? "",
@@ -40,20 +49,31 @@ export function uniqByArtist(songs: Song[]): SongsUniqByArtist {
   }));
 }
 
-const songPath = (userId: string) => `/users/${userId}/songs/`;
+function isIterable(obj: any) {
+  if (obj == null) return false;
+  return typeof obj[Symbol.iterator] === "function";
+}
 
-export function getSongs(userId: string): Promise<Song[] | null> {
+function getValueOnce(path: string): Promise<any[]> {
   return new Promise((resolve, reject) => {
     onValue(
-      ref(database, songPath(userId)),
-      (snapshot) => {
-        const songs = snapshot.val();
-        resolve(songs);
-      },
+      ref(database, path),
+      (snapshot) => resolve(snapshot.val()),
       (error) => reject(error),
       { onlyOnce: true }
     );
   });
+}
+
+const songPath = (userId: string) => `/users/${userId}/songs/`;
+
+export async function getSongs(userId: string): Promise<Song[]> {
+  const val = await getValueOnce(songPath(userId));
+  if (!isIterable(val)) {
+    throw new Error("value is not iterable");
+  }
+  const songs = Array.from(val).filter(isSong);
+  return songs;
 }
 
 export async function setSongs(userId: string, songs: Song[]) {

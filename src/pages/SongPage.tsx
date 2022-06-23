@@ -72,7 +72,9 @@ const SongPage: React.FC = () => {
 
   if (!userId) return <NotFoundPage />;
   if (data === undefined) {
-    getSongs(userId).then(setData);
+    getSongs(userId)
+      .then(setData)
+      .catch(() => setData(null));
     return <LoadingPage />;
   }
   if (data === null) {
