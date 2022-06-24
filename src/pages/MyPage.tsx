@@ -14,15 +14,13 @@ import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
-import ErrorPage from "./ErrorPage";
 import { Share } from "@mui/icons-material";
-import { getScreenName } from "../data/user";
-import { User } from "firebase/auth";
+import { User } from "../data/user";
 
-const MyPageContent: React.FC<{ user: User; userId: string }> = ({
-  user,
-  userId,
-}) => {
+const MyPageContent: React.FC<{
+  user: User;
+}> = ({ user }) => {
+  const userId = user.userId;
   const [data, setData] = useState<undefined | Songs>(undefined);
   useEffect(() => {
     getSongs(userId)
@@ -72,20 +70,10 @@ const MyPageContent: React.FC<{ user: User; userId: string }> = ({
 
 const MyPage: React.FC = () => {
   const us = useContext(UserStateContext);
-  if (us.state === "loading") {
-    return <LoadingPage />;
-  }
-  if (us.state === "signed out") {
-    return <UnauthorizedPage />;
-  }
+  if (us.state === "loading") return <LoadingPage />;
+  if (us.state === "signed out") return <UnauthorizedPage />;
 
-  const user = us.user;
-  const userId = getScreenName(user);
-
-  if (!userId) {
-    return <ErrorPage />;
-  }
-  return <MyPageContent user={user} userId={userId} />;
+  return <MyPageContent user={us.user} />;
 };
 
 export default MyPage;

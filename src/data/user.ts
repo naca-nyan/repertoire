@@ -1,8 +1,12 @@
-import { User } from "firebase/auth";
+import { User as AuthUser } from "firebase/auth";
 
-export function getScreenName(user: User): string | undefined {
+export type User = AuthUser & {
+  userId: string;
+};
+
+export function getScreenName(authuser: AuthUser): string | null {
   // FIXME: safe method to get screen name
   // @ts-ignore
-  const userId: string | undefined = user.reloadUserInfo?.screenName;
-  return userId;
+  const screenName: string | undefined = authuser.reloadUserInfo?.screenName;
+  return screenName || null;
 }

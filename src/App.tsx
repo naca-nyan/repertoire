@@ -8,6 +8,7 @@ import { defaultUserState, UserState, UserStateContext } from "./contexts/user";
 import { signInWithRedirect, signOut as authSignOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth, provider } from "./firebase";
+import { getScreenName } from "./data/user";
 
 const App: React.FC = () => {
   const [userState, setUserState] = useState<UserState>(defaultUserState);
@@ -18,11 +19,15 @@ const App: React.FC = () => {
       authSignOut(auth).then(() =>
         setUserState({ state: "signed out", signIn })
       );
-    auth.onAuthStateChanged((user) => {
-      const userState: UserState =
-        user === null
-          ? { state: "signed out", signIn }
-          : { state: "signed in", user, signOut };
+    auth.onAuthStateChanged((authUser) => {
+      let userState: UserState;
+      if (authUser === null) {
+        userState = { state: "signed out", signIn };
+      } else {
+        const userId = getScreenName(authUser) ?? authUser.uid;
+        const user = { ...authUser, userId };
+        userState = { state: "signed in", user, signOut };
+      }
       setUserState(userState);
     });
   }, []);

@@ -26,7 +26,6 @@ import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import { UserStateContext } from "../contexts/user";
-import { getScreenName } from "../data/user";
 
 const SongListSubHeader: React.FC<{
   collapsed: boolean;
@@ -65,7 +64,6 @@ function filterSongs(songs: Songs, filter: string): Songs {
 
 const SongPageContent: React.FC<{
   data: Songs;
-  loginUserId: string | undefined | null;
   loginUserData: Songs | undefined;
 }> = ({ data }) => {
   const [searchWord, setSearchWord] = useState("");
@@ -116,27 +114,17 @@ const SongPage: React.FC = () => {
 
   useEffect(() => {
     if (us.state !== "signed in") return;
-    const loginUser = us.user;
-    const loginUserId = getScreenName(loginUser);
-    if (!loginUserId) return;
-    getSongs(loginUserId).then(setLoginUserData);
+    getSongs(us.user.userId).then(setLoginUserData);
   }, [us]);
 
   if (!subjectUserId) return <NotFoundPage />;
   if (subjectData === undefined) return <LoadingPage />;
   if (subjectData === null) return <NotFoundPage />;
 
-  const loginUser = us.state === "signed in" ? us.user : null;
-  const loginUserId = loginUser ? getScreenName(loginUser) : null;
-
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
       <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
-      <SongPageContent
-        data={subjectData}
-        loginUserId={loginUserId}
-        loginUserData={loginUserData}
-      />
+      <SongPageContent data={subjectData} loginUserData={loginUserData} />
     </Container>
   );
 };
