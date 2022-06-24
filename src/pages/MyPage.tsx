@@ -16,12 +16,14 @@ import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { Share } from "@mui/icons-material";
 import { User } from "../data/user";
+import { BookmarksContext } from "../contexts/bookmarks";
 
 const MyPageContent: React.FC<{
   user: User;
 }> = ({ user }) => {
   const userId = user.userId;
   const [data, setData] = useState<undefined | Songs>(undefined);
+
   useEffect(() => {
     getSongs(userId)
       .then((songs) => setData(songs))
@@ -30,6 +32,7 @@ const MyPageContent: React.FC<{
         setData({});
       });
   }, [userId]);
+
   if (data === undefined) {
     return <LoadingPage />;
   }
@@ -46,6 +49,8 @@ const MyPageContent: React.FC<{
     navigator.clipboard.writeText(shareURL);
   }
 
+  const bookmarks = Object.keys(data);
+
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -59,9 +64,11 @@ const MyPageContent: React.FC<{
         </Typography>
       </Box>
       <Paper elevation={3} sx={{ mt: 2 }}>
-        <List component="nav" dense>
-          <SongList data={data} collapsed={false} />
-        </List>
+        <BookmarksContext.Provider value={bookmarks}>
+          <List component="nav" dense>
+            <SongList data={data} collapsed={false} />
+          </List>
+        </BookmarksContext.Provider>
       </Paper>
       <SongSubmitForm onAddSong={onAddSong} />
     </Container>

@@ -26,6 +26,7 @@ import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import { UserStateContext } from "../contexts/user";
+import { BookmarksContext } from "../contexts/bookmarks";
 
 const SongListSubHeader: React.FC<{
   collapsed: boolean;
@@ -64,7 +65,6 @@ function filterSongs(songs: Songs, filter: string): Songs {
 
 const SongPageContent: React.FC<{
   data: Songs;
-  loginUserData: Songs | undefined;
 }> = ({ data }) => {
   const [searchWord, setSearchWord] = useState("");
   const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
@@ -121,11 +121,15 @@ const SongPage: React.FC = () => {
   if (subjectData === undefined) return <LoadingPage />;
   if (subjectData === null) return <NotFoundPage />;
 
+  const bookmarks = loginUserData ? Object.keys(loginUserData) : [];
+
   return (
-    <Container maxWidth="sm" sx={{ mt: 3 }}>
-      <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
-      <SongPageContent data={subjectData} loginUserData={loginUserData} />
-    </Container>
+    <BookmarksContext.Provider value={bookmarks}>
+      <Container maxWidth="sm" sx={{ mt: 3 }}>
+        <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
+        <SongPageContent data={subjectData} />
+      </Container>
+    </BookmarksContext.Provider>
   );
 };
 export default SongPage;
