@@ -1,6 +1,7 @@
 import React, {
   ChangeEventHandler,
   MouseEventHandler,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -24,6 +25,8 @@ import { getSongs, Songs } from "../data/song";
 import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
+import { UserStateContext } from "../contexts/user";
+import { getScreenName } from "../data/user";
 
 const SongListSubHeader: React.FC<{
   collapsed: boolean;
@@ -46,7 +49,11 @@ const SongListSubHeader: React.FC<{
   );
 };
 
-const SongListWithSearchBar: React.FC<{ data: Songs }> = ({ data }) => {
+const SongPageContent: React.FC<{
+  data: Songs;
+  loginUserId: string | undefined | null;
+  loginUserData: Songs | undefined;
+}> = ({ data }) => {
   const [searchWord, setSearchWord] = useState("");
   const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
   useDebounce(() => setDebouncedSearchWord(searchWord), 300, [searchWord]);
@@ -72,36 +79,52 @@ const SongListWithSearchBar: React.FC<{ data: Songs }> = ({ data }) => {
 };
 
 const SongPage: React.FC = () => {
-  const { userId } = useParams();
-  const [data, setData] = useState<undefined | null | Songs>(undefined);
+  const { userId: subjectUserId } = useParams();
+  const [subjectData, setSubjectData] = useState<undefined | null | Songs>(
+    undefined
+  );
 
   useEffect(() => {
-    if (!userId) {
-      setData(null);
+    if (!subjectUserId) {
+      setSubjectData(null);
       return;
     }
-    getSongs(userId)
-      .then(setData)
+    getSongs(subjectUserId)
+      .then(setSubjectData)
       .catch((e) => {
         console.warn(e);
-        setData(null);
+        setSubjectData(null);
       });
-  }, [userId]);
+  }, [subjectUserId]);
 
-  if (!userId) {
-    console.log("userid was falsy");
-    return <NotFoundPage />;
-  }
-  if (data === undefined) return <LoadingPage />;
-  if (data === null) {
-    console.log("data was null");
-    return <NotFoundPage />;
-  }
+  const us = useContext(UserStateContext);
+  const [loginUserData, setLoginUserData] = useState<undefined | Songs>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (us.state !== "signed in") return;
+    const loginUser = us.user;
+    const loginUserId = getScreenName(loginUser);
+    if (!loginUserId) return;
+    getSongs(loginUserId).then(setLoginUserData);
+  }, [us]);
+
+  if (!subjectUserId) return <NotFoundPage />;
+  if (subjectData === undefined) return <LoadingPage />;
+  if (subjectData === null) return <NotFoundPage />;
+
+  const loginUser = us.state === "signed in" ? us.user : null;
+  const loginUserId = loginUser ? getScreenName(loginUser) : null;
 
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
-      <Typography variant="h6">@{userId} さんの知ってる曲</Typography>
-      <SongListWithSearchBar data={data} />
+      <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
+      <SongPageContent
+        data={subjectData}
+        loginUserId={loginUserId}
+        loginUserData={loginUserData}
+      />
     </Container>
   );
 };

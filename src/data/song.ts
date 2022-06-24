@@ -1,4 +1,12 @@
-import { child, onValue, push, ref, update } from "firebase/database";
+import {
+  child,
+  onValue,
+  push,
+  ref,
+  remove,
+  set,
+  update,
+} from "firebase/database";
 import { database as db } from "../firebase";
 
 export interface Song {
@@ -83,4 +91,16 @@ export async function pushSong(userId: string, song: Song): Promise<string> {
   };
   await update(ref(db), updates);
   return key;
+}
+
+export async function setSong(
+  userId: string,
+  songId: string,
+  song: Song
+): Promise<void> {
+  return set(ref(db, `/users/${userId}/songs/${songId}`), song);
+}
+
+export async function removeSong(userId: string, songId: string) {
+  return remove(ref(db, `/users/${userId}/songs/${songId}`));
 }
