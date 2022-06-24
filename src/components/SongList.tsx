@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
-import { Song, Songs, uniqByArtist } from "../data/song";
+import { Songs } from "../data/song";
 
 function labelURL(url: string): string {
   let label = "";
@@ -66,32 +66,20 @@ const SongListItem: React.FC<{
   );
 };
 
-function songIncludes(filter: string): (s: Song) => boolean {
-  const weakIncludes = (a: string, b: string) =>
-    a.toLowerCase().includes(b.toLowerCase());
-  return ({ artist, title }) => {
-    return weakIncludes(artist, filter) || weakIncludes(title, filter);
-  };
-}
-
-function filterSongs(songs: Songs, filter: string): Songs {
-  const newSongs: Songs = {};
-  const array = Object.entries(songs).filter(([songId, song]) =>
-    songIncludes(filter)(song)
-  );
-  array.forEach(([songId, song]) => {
-    newSongs[songId] = song;
-  });
-  return newSongs;
+function uniqByArtist(songs: Songs): { [artist: string]: Songs } {
+  const artists: { [artist: string]: Songs } = {};
+  for (const [songId, song] of Object.entries(songs)) {
+    const songsOfTheArtist = artists[song.artist];
+    artists[song.artist] = { ...songsOfTheArtist, [songId]: song };
+  }
+  return artists;
 }
 
 const SongList: React.FC<{
   data: Songs;
-  filter: string;
   collapsed: boolean;
-}> = React.memo(({ data, filter, collapsed }) => {
-  const filtered = filter ? filterSongs(data, filter) : data;
-  const uniq = uniqByArtist(filtered);
+}> = React.memo(({ data, collapsed }) => {
+  const uniq = uniqByArtist(data);
   return (
     <>
       {Object.entries(uniq).map(([artist, songs]) => (

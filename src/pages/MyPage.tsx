@@ -62,7 +62,7 @@ const MyPageContent: React.FC<{ user: User; userId: string }> = ({
       </Box>
       <Paper elevation={3} sx={{ mt: 2 }}>
         <List component="nav" dense>
-          <SongList data={data} filter="" collapsed={false} />
+          <SongList data={data} collapsed={false} />
         </List>
       </Paper>
       <SongSubmitForm onAddSong={onAddSong} />

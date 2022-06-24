@@ -38,19 +38,6 @@ export function unpartial(obj: Partial<Song>): Song {
   };
 }
 
-export type SongsUniqByArtist = {
-  [artist: string]: Songs;
-};
-
-export function uniqByArtist(songs: Songs): SongsUniqByArtist {
-  const artists: { [artist: string]: Songs } = {};
-  for (const [songId, song] of Object.entries(songs)) {
-    const songsOfTheArtist = artists[song.artist];
-    artists[song.artist] = { ...songsOfTheArtist, [songId]: song };
-  }
-  return artists;
-}
-
 function getValueOnce(path: string): Promise<any> {
   return new Promise((resolve, reject) => {
     onValue(

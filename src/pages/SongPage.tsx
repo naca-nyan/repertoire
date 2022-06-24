@@ -49,6 +49,20 @@ const SongListSubHeader: React.FC<{
   );
 };
 
+function filterSongs(songs: Songs, filter: string): Songs {
+  const filterLowerCase = filter.toLowerCase();
+  const filteredEntries = Object.entries(songs).filter((songEntry) => {
+    const [, { title, artist }] = songEntry;
+    const titleLowerCase = title.toLowerCase();
+    const artistLowerCase = artist.toLowerCase();
+    return (
+      titleLowerCase.includes(filterLowerCase) ||
+      artistLowerCase.includes(filterLowerCase)
+    );
+  });
+  return Object.fromEntries(filteredEntries);
+}
+
 const SongPageContent: React.FC<{
   data: Songs;
   loginUserId: string | undefined | null;
@@ -65,14 +79,12 @@ const SongPageContent: React.FC<{
     onChangeSearchWord: (e) => setSearchWord(e.currentTarget.value),
     onClickToggleButton: () => setCollapsed(!collapsed),
   });
+  const filter = debouncedSearchWord;
+  const filtered = filter ? filterSongs(data, filter) : data;
   return (
     <Paper elevation={3} sx={{ mt: 2 }}>
       <List component="nav" dense subheader={subheader}>
-        <SongList
-          data={data}
-          filter={debouncedSearchWord}
-          collapsed={collapsed}
-        />
+        <SongList data={filtered} collapsed={collapsed} />
       </List>
     </Paper>
   );
