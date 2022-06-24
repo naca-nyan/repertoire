@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from "react";
 import {
   Collapse,
+  IconButton,
   Link,
   List,
+  ListItem,
   ListItemButton,
   ListItemText,
+  SxProps,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { ExpandLess, ExpandMore, OpenInNew } from "@mui/icons-material";
-import { Songs } from "../data/song";
+import {
+  BookmarkAdded,
+  BookmarkBorder,
+  ExpandLess,
+  ExpandMore,
+  OpenInNew,
+} from "@mui/icons-material";
+import { setSong, Song, Songs } from "../data/song";
 
 function labelURL(url: string): string {
   let label = "";
@@ -19,7 +28,65 @@ function labelURL(url: string): string {
   return label ? `${label} (${urlDecoded})` : urlDecoded;
 }
 
-const SongListItem: React.FC<{
+const BookmarkButton: React.FC<{
+  songId: string;
+  song: Song;
+  sx?: SxProps;
+}> = ({ songId, song, sx }) => {
+  const [clicked, setClicked] = useState(false);
+  // TODO: get userId from Context
+  const userId = "test_user";
+  const onClick = () => {
+    setSong(userId, songId, song);
+    setClicked(true);
+  };
+  return (
+    <Tooltip title={clicked ? "知ってる曲に保存しました！" : "知ってる曲！"}>
+      <IconButton onClick={onClick} edge="end" disabled={clicked} sx={sx}>
+        {clicked ? (
+          <BookmarkAdded sx={{ color: "#d1001f" }} />
+        ) : (
+          <BookmarkBorder />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
+};
+
+const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
+  <List component="div" disablePadding dense>
+    {Object.entries(songs).map(([songId, { title, artist, url, comment }]) => (
+      <ListItem
+        disablePadding
+        key={songId}
+        secondaryAction={
+          <BookmarkButton songId={songId} song={{ title, artist, url }} />
+        }
+      >
+        <Tooltip arrow title={labelURL(url)} placement="bottom-start">
+          <ListItemButton
+            component="a"
+            href={url}
+            target="_blank"
+            rel="noopener"
+          >
+            <ListItemText>
+              <Link component="span">{title}</Link>
+              <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
+              <Typography
+                sx={{ float: "right", color: "#999", fontSize: "1em" }}
+              >
+                {comment}
+              </Typography>
+            </ListItemText>
+          </ListItemButton>
+        </Tooltip>
+      </ListItem>
+    ))}
+  </List>
+);
+
+const SongListOfArtist: React.FC<{
   artist: string;
   songs: Songs;
   open?: boolean;
@@ -37,30 +104,7 @@ const SongListItem: React.FC<{
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding dense>
-          {Object.values(songs).map(({ url, title, comment }) => (
-            <ListItemButton
-              component="a"
-              href={url}
-              target="_blank"
-              rel="noopener"
-              key={title}
-              sx={{ pl: 4 }}
-            >
-              <Tooltip arrow title={labelURL(url)} placement="bottom-start">
-                <ListItemText>
-                  <Link component="span">{title}</Link>
-                  <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
-                  <Typography
-                    sx={{ float: "right", color: "#999", fontSize: "1em" }}
-                  >
-                    {comment}
-                  </Typography>
-                </ListItemText>
-              </Tooltip>
-            </ListItemButton>
-          ))}
-        </List>
+        <ListSongs songs={songs} />
       </Collapse>
     </>
   );
@@ -83,7 +127,7 @@ const SongList: React.FC<{
   return (
     <>
       {Object.entries(uniq).map(([artist, songs]) => (
-        <SongListItem
+        <SongListOfArtist
           key={artist}
           artist={artist}
           songs={songs}
