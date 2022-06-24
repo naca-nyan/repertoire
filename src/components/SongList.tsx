@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Collapse,
   IconButton,
@@ -19,6 +19,8 @@ import {
   OpenInNew,
 } from "@mui/icons-material";
 import { setSong, Song, Songs } from "../data/song";
+import { UserStateContext } from "../contexts/user";
+import { BookmarksContext } from "../contexts/bookmarks";
 
 function labelURL(url: string): string {
   let label = "";
@@ -33,9 +35,18 @@ const BookmarkButton: React.FC<{
   song: Song;
   sx?: SxProps;
 }> = ({ songId, song, sx }) => {
-  const [clicked, setClicked] = useState(false);
-  // TODO: get userId from Context
-  const userId = "test_user";
+  const us = useContext(UserStateContext);
+  const bookmarks = useContext(BookmarksContext);
+  const bookmarked = bookmarks.includes(songId);
+  const [clicked, setClicked] = useState(bookmarked);
+  const userId = us.state === "signed in" ? us.user.userId : null;
+  if (userId === null) {
+    return (
+      <Tooltip title={"知ってる曲を登録するにはログイン！"}>
+        <BookmarkBorder />
+      </Tooltip>
+    );
+  }
   const onClick = () => {
     setSong(userId, songId, song);
     setClicked(true);
