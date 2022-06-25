@@ -7,21 +7,20 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  SxProps,
   Tooltip,
   Typography,
 } from "@mui/material";
 import {
   Bookmark,
-  BookmarkAdded,
   BookmarkBorder,
   ExpandLess,
   ExpandMore,
   OpenInNew,
 } from "@mui/icons-material";
-import { setSong, Song, Songs } from "../data/song";
+import { removeSong, setSong, Song, Songs } from "../data/song";
 import { UserStateContext } from "../contexts/user";
-import { BookmarksContext } from "../contexts/bookmarks";
+import { onValue, ref } from "firebase/database";
+import { database } from "../firebase";
 
 function labelURL(url: string): string {
   let label = "";
@@ -34,40 +33,44 @@ function labelURL(url: string): string {
 const BookmarkButton: React.FC<{
   songId: string;
   song: Song;
-  sx?: SxProps;
-}> = ({ songId, song, sx }) => {
+}> = ({ songId, song }) => {
   const us = useContext(UserStateContext);
-  const bookmarks = useContext(BookmarksContext);
-  const bookmarked = bookmarks.includes(songId);
-  const [clicked, setClicked] = useState(bookmarked);
-  useEffect(() => setClicked(bookmarked), [bookmarked]);
   const userId = us.state === "signed in" ? us.user.userId : null;
+  const [bookmarked, setBookmarked] = useState(false);
+  useEffect(
+    () =>
+      onValue(ref(database, `/users/${userId}/songs/${songId}`), (snapshot) => {
+        setBookmarked(snapshot.exists());
+      }),
+    [userId, songId]
+  );
+
   if (userId === null) {
     return (
-      <Tooltip title={"知ってる曲を登録するにはログイン！"}>
+      <Tooltip title="知ってる曲を登録するにはログイン！">
         <BookmarkBorder />
       </Tooltip>
     );
   }
+  const onClickAdded = () => {
+    removeSong(userId, songId);
+  };
   if (bookmarked) {
     return (
-      <Tooltip title={"知ってる曲に登録済み"}>
-        <Bookmark />
+      <Tooltip title="知ってる曲に登録済み">
+        <IconButton onClick={onClickAdded} edge="end">
+          <Bookmark />
+        </IconButton>
       </Tooltip>
     );
   }
   const onClick = () => {
     setSong(userId, songId, song);
-    setClicked(true);
   };
   return (
-    <Tooltip title={clicked ? "知ってる曲に保存しました！" : "知ってる曲！"}>
-      <IconButton onClick={onClick} edge="end" disabled={clicked} sx={sx}>
-        {clicked ? (
-          <BookmarkAdded sx={{ color: "#d1001f" }} />
-        ) : (
-          <BookmarkBorder />
-        )}
+    <Tooltip title="知ってる曲！">
+      <IconButton onClick={onClick} edge="end">
+        <BookmarkBorder />
       </IconButton>
     </Tooltip>
   );

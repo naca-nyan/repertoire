@@ -16,7 +16,6 @@ import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { Share } from "@mui/icons-material";
 import { User } from "../data/user";
-import { BookmarksContext } from "../contexts/bookmarks";
 
 const MyPageContent: React.FC<{
   user: User;
@@ -49,8 +48,6 @@ const MyPageContent: React.FC<{
     navigator.clipboard.writeText(shareURL);
   }
 
-  const bookmarks = Object.keys(data);
-
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -64,11 +61,9 @@ const MyPageContent: React.FC<{
         </Typography>
       </Box>
       <Paper elevation={3} sx={{ mt: 2 }}>
-        <BookmarksContext.Provider value={bookmarks}>
-          <List component="nav" dense>
-            <SongList data={data} collapsed={false} />
-          </List>
-        </BookmarksContext.Provider>
+        <List component="nav" dense>
+          <SongList data={data} collapsed={false} />
+        </List>
       </Paper>
       <SongSubmitForm onAddSong={onAddSong} />
     </Container>
