@@ -1,7 +1,6 @@
 import React, {
   ChangeEventHandler,
   MouseEventHandler,
-  useContext,
   useEffect,
   useState,
 } from "react";
@@ -25,8 +24,6 @@ import { getSongs, Songs } from "../data/song";
 import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
-import { UserStateContext } from "../contexts/user";
-import { BookmarksContext } from "../contexts/bookmarks";
 
 const SongListSubHeader: React.FC<{
   collapsed: boolean;
@@ -107,29 +104,15 @@ const SongPage: React.FC = () => {
       });
   }, [subjectUserId]);
 
-  const us = useContext(UserStateContext);
-  const [loginUserData, setLoginUserData] = useState<undefined | Songs>(
-    undefined
-  );
-
-  useEffect(() => {
-    if (us.state !== "signed in") return;
-    getSongs(us.user.userId).then(setLoginUserData);
-  }, [us]);
-
   if (!subjectUserId) return <NotFoundPage />;
   if (subjectData === undefined) return <LoadingPage />;
   if (subjectData === null) return <NotFoundPage />;
 
-  const bookmarks = loginUserData ? Object.keys(loginUserData) : [];
-
   return (
-    <BookmarksContext.Provider value={bookmarks}>
-      <Container maxWidth="sm" sx={{ mt: 3 }}>
-        <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
-        <SongPageContent data={subjectData} />
-      </Container>
-    </BookmarksContext.Provider>
+    <Container maxWidth="sm" sx={{ mt: 3 }}>
+      <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
+      <SongPageContent data={subjectData} />
+    </Container>
   );
 };
 export default SongPage;
