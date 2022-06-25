@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import {
+  Bookmark,
   BookmarkAdded,
   BookmarkBorder,
   ExpandLess,
@@ -39,11 +40,19 @@ const BookmarkButton: React.FC<{
   const bookmarks = useContext(BookmarksContext);
   const bookmarked = bookmarks.includes(songId);
   const [clicked, setClicked] = useState(bookmarked);
+  useEffect(() => setClicked(bookmarked), [bookmarked]);
   const userId = us.state === "signed in" ? us.user.userId : null;
   if (userId === null) {
     return (
       <Tooltip title={"知ってる曲を登録するにはログイン！"}>
         <BookmarkBorder />
+      </Tooltip>
+    );
+  }
+  if (bookmarked) {
+    return (
+      <Tooltip title={"知ってる曲に登録済み"}>
+        <Bookmark />
       </Tooltip>
     );
   }
