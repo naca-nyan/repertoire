@@ -17,10 +17,8 @@ import {
   ExpandMore,
   OpenInNew,
 } from "@mui/icons-material";
-import { removeSong, setSong, Song, Songs } from "../data/song";
+import { onSongExists, removeSong, setSong, Song, Songs } from "../data/song";
 import { UserStateContext } from "../contexts/user";
-import { onValue, ref } from "firebase/database";
-import { database } from "../firebase";
 
 function labelURL(url: string): string {
   let label = "";
@@ -37,13 +35,10 @@ const BookmarkButton: React.FC<{
   const us = useContext(UserStateContext);
   const userId = us.state === "signed in" ? us.user.userId : null;
   const [bookmarked, setBookmarked] = useState(false);
-  useEffect(
-    () =>
-      onValue(ref(database, `/users/${userId}/songs/${songId}`), (snapshot) => {
-        setBookmarked(snapshot.exists());
-      }),
-    [userId, songId]
-  );
+  useEffect(() => {
+    if (!userId) return;
+    onSongExists(userId, songId, setBookmarked);
+  }, [userId, songId]);
 
   if (userId === null) {
     return (

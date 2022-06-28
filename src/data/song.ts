@@ -91,3 +91,14 @@ export async function setSong(
 export async function removeSong(userId: string, songId: string) {
   return remove(ref(db, `/users/${userId}/songs/${songId}`));
 }
+
+export function onSongExists(
+  userId: string,
+  songId: string,
+  callback: (songExists: boolean) => void
+) {
+  onValue(ref(db, `/users/${userId}/songs/${songId}`), (snapshot) => {
+    const songExists = snapshot.exists();
+    callback(songExists);
+  });
+}
