@@ -1,13 +1,6 @@
-import {
-  child,
-  onValue,
-  push,
-  ref,
-  remove,
-  set,
-  update,
-} from "firebase/database";
+import { onValue, ref, remove, set, update } from "firebase/database";
 import { database as db } from "../firebase";
+import { sha256 } from "../utils/hash";
 
 export interface Song {
   artist: string;
@@ -72,8 +65,9 @@ export async function getSongs(userId?: string): Promise<Songs> {
 }
 
 export async function pushSong(userId: string, song: Song): Promise<string> {
-  const key = push(child(ref(db), `${root}/songs`)).key;
-  if (key === null) throw new Error("could not push song; key is null");
+  const pKey = [song.title, song.artist, song.url].join(":");
+  // Use first 32 chars of SHA-256 hash
+  const key = (await sha256(pKey)).substring(0, 32);
   const updates = {
     [`${root}/songs/${key}`]: song,
     [`${root}/users/${userId}/songs/${key}`]: song,
