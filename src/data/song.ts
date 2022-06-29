@@ -1,4 +1,5 @@
 import {
+  DataSnapshot,
   onValue,
   orderByChild,
   query,
@@ -43,29 +44,34 @@ export function unpartial(obj: Partial<Song>): Song {
 
 const root = "/v1";
 
-function getValueOnce(path: string, orderBy: string): Promise<any> {
+function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
   return new Promise((resolve, reject) => {
-    onValue(
-      query(ref(db, path), orderByChild(orderBy)),
-      (snapshot) => resolve(snapshot.val()),
-      (error) => reject(error),
-      { onlyOnce: true }
-    );
+    onValue(query(ref(db, path), orderByChild(orderBy)), resolve, reject, {
+      onlyOnce: true,
+    });
   });
 }
 
-async function getAllSongs(): Promise<Songs> {
-  const val = await getValueOnce(`${root}/songs/`, "createdAt");
+function snapshotToSongs(snapshot: DataSnapshot): Songs {
+  const val = snapshot.val();
   if (!Object.values(val).every(isSong))
     throw new Error("Type validation failed: a value of songs is not song");
   return val;
 }
 
+async function getAllSongs(): Promise<Songs> {
+  const snapshot = await getValueOnce(`${root}/songs/`, "createdAt");
+  const songs = snapshotToSongs(snapshot);
+  return songs;
+}
+
 export async function getSongsOfUser(userId: string): Promise<Songs> {
-  const val = await getValueOnce(`${root}/users/${userId}/songs/`, "createdAt");
-  if (!Object.values(val).every(isSong))
-    throw new Error("Type validation failed: a value of songs is not song");
-  return val;
+  const snapshot = await getValueOnce(
+    `${root}/users/${userId}/songs/`,
+    "createdAt"
+  );
+  const songs = snapshotToSongs(snapshot);
+  return songs;
 }
 
 export async function getSongs(userId?: string): Promise<Songs> {
