@@ -1,31 +1,33 @@
 import {
-  child,
+  DataSnapshot,
   onValue,
-  push,
+  orderByChild,
+  query,
   ref,
   remove,
   set,
   update,
 } from "firebase/database";
 import { database as db } from "../firebase";
+import { sha256 } from "../utils/hash";
 
 export interface Song {
   artist: string;
   title: string;
   url: string;
   comment?: string;
+  createdAt?: number;
 }
 
-export interface Songs {
-  [songId: string]: Song;
-}
+export type Songs = [string, Song][];
 
 function isSong(x: any): x is Song {
   return (
     typeof x.artist === "string" &&
     typeof x.title === "string" &&
     typeof x.url === "string" &&
-    ["string", "undefined"].includes(typeof x.comment)
+    ["string", "undefined"].includes(typeof x.comment) &&
+    ["number", "undefined"].includes(typeof x.createdAt)
   );
 }
 
@@ -38,29 +40,42 @@ export function unpartial(obj: Partial<Song>): Song {
   };
 }
 
-function getValueOnce(path: string): Promise<any> {
+const root = "/v1";
+
+function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
   return new Promise((resolve, reject) => {
-    onValue(
-      ref(db, path),
-      (snapshot) => resolve(snapshot.val()),
-      (error) => reject(error),
-      { onlyOnce: true }
-    );
+    onValue(query(ref(db, path), orderByChild(orderBy)), resolve, reject, {
+      onlyOnce: true,
+    });
   });
 }
 
+function snapshotToSongs(snapshot: DataSnapshot): Songs {
+  const songs: Songs = [];
+  snapshot.forEach((child) => {
+    const songId = child.key;
+    const song = child.val();
+    if (songId === null) throw new Error("Invalid ID: songId is null");
+    if (!isSong(song))
+      throw new Error("Type validation failed: a value of child is not song");
+    songs.push([songId, song]);
+  });
+  return songs;
+}
+
 async function getAllSongs(): Promise<Songs> {
-  const val = await getValueOnce(`/songs/`);
-  if (!Object.values(val).every(isSong))
-    throw new Error("Type validation failed: a value of songs is not song");
-  return val;
+  const snapshot = await getValueOnce(`${root}/songs/`, "createdAt");
+  const songs = snapshotToSongs(snapshot);
+  return songs;
 }
 
 export async function getSongsOfUser(userId: string): Promise<Songs> {
-  const val = await getValueOnce(`/users/${userId}/songs/`);
-  if (!Object.values(val).every(isSong))
-    throw new Error("Type validation failed: a value of songs is not song");
-  return val;
+  const snapshot = await getValueOnce(
+    `${root}/users/${userId}/songs/`,
+    "createdAt"
+  );
+  const songs = snapshotToSongs(snapshot);
+  return songs;
 }
 
 export async function getSongs(userId?: string): Promise<Songs> {
@@ -69,12 +84,17 @@ export async function getSongs(userId?: string): Promise<Songs> {
   return await getSongsOfUser(userId);
 }
 
+function songCreatedAtNow(song: Song): Song {
+  return { ...song, createdAt: Date.now() };
+}
+
 export async function pushSong(userId: string, song: Song): Promise<string> {
-  const key = push(child(ref(db), "songs")).key;
-  if (key === null) throw new Error("could not push song; key is null");
+  const pKey = [song.title, song.artist, song.url].join(":");
+  // Use first 32 chars of SHA-256 hash
+  const key = (await sha256(pKey)).substring(0, 32);
   const updates = {
-    [`/songs/${key}`]: song,
-    [`/users/${userId}/songs/${key}`]: song,
+    [`${root}/songs/${key}`]: song,
+    [`${root}/users/${userId}/songs/${key}`]: songCreatedAtNow(song),
   };
   await update(ref(db), updates);
   return key;
@@ -85,9 +105,23 @@ export async function setSong(
   songId: string,
   song: Song
 ): Promise<void> {
-  return set(ref(db, `/users/${userId}/songs/${songId}`), song);
+  return set(
+    ref(db, `${root}/users/${userId}/songs/${songId}`),
+    songCreatedAtNow(song)
+  );
 }
 
 export async function removeSong(userId: string, songId: string) {
-  return remove(ref(db, `/users/${userId}/songs/${songId}`));
+  return remove(ref(db, `${root}/users/${userId}/songs/${songId}`));
+}
+
+export function onSongExists(
+  userId: string,
+  songId: string,
+  callback: (songExists: boolean) => void
+) {
+  onValue(ref(db, `${root}/users/${userId}/songs/${songId}`), (snapshot) => {
+    const songExists = snapshot.exists();
+    callback(songExists);
+  });
 }

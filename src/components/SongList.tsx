@@ -17,10 +17,8 @@ import {
   ExpandMore,
   OpenInNew,
 } from "@mui/icons-material";
-import { removeSong, setSong, Song, Songs } from "../data/song";
+import { onSongExists, removeSong, setSong, Song, Songs } from "../data/song";
 import { UserStateContext } from "../contexts/user";
-import { onValue, ref } from "firebase/database";
-import { database } from "../firebase";
 
 function labelURL(url: string): string {
   let label = "";
@@ -37,13 +35,10 @@ const BookmarkButton: React.FC<{
   const us = useContext(UserStateContext);
   const userId = us.state === "signed in" ? us.user.userId : null;
   const [bookmarked, setBookmarked] = useState(false);
-  useEffect(
-    () =>
-      onValue(ref(database, `/users/${userId}/songs/${songId}`), (snapshot) => {
-        setBookmarked(snapshot.exists());
-      }),
-    [userId, songId]
-  );
+  useEffect(() => {
+    if (!userId) return;
+    onSongExists(userId, songId, setBookmarked);
+  }, [userId, songId]);
 
   if (userId === null) {
     return (
@@ -78,7 +73,7 @@ const BookmarkButton: React.FC<{
 
 const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
   <List component="div" disablePadding dense>
-    {Object.entries(songs).map(([songId, { title, artist, url, comment }]) => (
+    {songs.map(([songId, { title, artist, url, comment }]) => (
       <ListItem
         disablePadding
         key={songId}
@@ -135,9 +130,9 @@ const SongListOfArtist: React.FC<{
 
 function uniqByArtist(songs: Songs): { [artist: string]: Songs } {
   const artists: { [artist: string]: Songs } = {};
-  for (const [songId, song] of Object.entries(songs)) {
-    const songsOfTheArtist = artists[song.artist];
-    artists[song.artist] = { ...songsOfTheArtist, [songId]: song };
+  for (const [songId, song] of songs) {
+    const songsOfTheArtist = artists[song.artist] ?? [];
+    artists[song.artist] = [...songsOfTheArtist, [songId, song]];
   }
   return artists;
 }

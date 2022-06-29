@@ -48,7 +48,7 @@ const SongListSubHeader: React.FC<{
 
 function filterSongs(songs: Songs, filter: string): Songs {
   const filterLowerCase = filter.toLowerCase();
-  const filteredEntries = Object.entries(songs).filter((songEntry) => {
+  const filteredEntries = songs.filter((songEntry) => {
     const [, { title, artist }] = songEntry;
     const titleLowerCase = title.toLowerCase();
     const artistLowerCase = artist.toLowerCase();
@@ -57,7 +57,7 @@ function filterSongs(songs: Songs, filter: string): Songs {
       artistLowerCase.includes(filterLowerCase)
     );
   });
-  return Object.fromEntries(filteredEntries);
+  return filteredEntries;
 }
 
 const SongPageContent: React.FC<{
