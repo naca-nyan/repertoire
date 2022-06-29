@@ -1,4 +1,12 @@
-import { onValue, ref, remove, set, update } from "firebase/database";
+import {
+  onValue,
+  orderByChild,
+  query,
+  ref,
+  remove,
+  set,
+  update,
+} from "firebase/database";
 import { database as db } from "../firebase";
 import { sha256 } from "../utils/hash";
 
@@ -7,6 +15,7 @@ export interface Song {
   title: string;
   url: string;
   comment?: string;
+  createdAt?: number;
 }
 
 export interface Songs {
@@ -18,7 +27,8 @@ function isSong(x: any): x is Song {
     typeof x.artist === "string" &&
     typeof x.title === "string" &&
     typeof x.url === "string" &&
-    ["string", "undefined"].includes(typeof x.comment)
+    ["string", "undefined"].includes(typeof x.comment) &&
+    ["number", "undefined"].includes(typeof x.createdAt)
   );
 }
 
@@ -33,10 +43,10 @@ export function unpartial(obj: Partial<Song>): Song {
 
 const root = "/v1";
 
-function getValueOnce(path: string): Promise<any> {
+function getValueOnce(path: string, orderBy: string): Promise<any> {
   return new Promise((resolve, reject) => {
     onValue(
-      ref(db, path),
+      query(ref(db, path), orderByChild(orderBy)),
       (snapshot) => resolve(snapshot.val()),
       (error) => reject(error),
       { onlyOnce: true }
@@ -45,14 +55,14 @@ function getValueOnce(path: string): Promise<any> {
 }
 
 async function getAllSongs(): Promise<Songs> {
-  const val = await getValueOnce(`${root}/songs/`);
+  const val = await getValueOnce(`${root}/songs/`, "createdAt");
   if (!Object.values(val).every(isSong))
     throw new Error("Type validation failed: a value of songs is not song");
   return val;
 }
 
 export async function getSongsOfUser(userId: string): Promise<Songs> {
-  const val = await getValueOnce(`${root}/users/${userId}/songs/`);
+  const val = await getValueOnce(`${root}/users/${userId}/songs/`, "createdAt");
   if (!Object.values(val).every(isSong))
     throw new Error("Type validation failed: a value of songs is not song");
   return val;
@@ -64,13 +74,17 @@ export async function getSongs(userId?: string): Promise<Songs> {
   return await getSongsOfUser(userId);
 }
 
+function songCreatedAtNow(song: Song): Song {
+  return { ...song, createdAt: Date.now() };
+}
+
 export async function pushSong(userId: string, song: Song): Promise<string> {
   const pKey = [song.title, song.artist, song.url].join(":");
   // Use first 32 chars of SHA-256 hash
   const key = (await sha256(pKey)).substring(0, 32);
   const updates = {
     [`${root}/songs/${key}`]: song,
-    [`${root}/users/${userId}/songs/${key}`]: song,
+    [`${root}/users/${userId}/songs/${key}`]: songCreatedAtNow(song),
   };
   await update(ref(db), updates);
   return key;
@@ -81,7 +95,10 @@ export async function setSong(
   songId: string,
   song: Song
 ): Promise<void> {
-  return set(ref(db, `${root}/users/${userId}/songs/${songId}`), song);
+  return set(
+    ref(db, `${root}/users/${userId}/songs/${songId}`),
+    songCreatedAtNow(song)
+  );
 }
 
 export async function removeSong(userId: string, songId: string) {
