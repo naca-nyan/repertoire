@@ -27,8 +27,8 @@ const MyPageContent: React.FC<{
     getSongs(userId)
       .then((songs) => setData(songs))
       .catch(() => {
-        console.warn("Failed to fetch songs; fallback to {}");
-        setData({});
+        console.warn("Failed to fetch songs; fallback to []");
+        setData([]);
       });
   }, [userId]);
 

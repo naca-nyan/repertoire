@@ -73,7 +73,7 @@ const BookmarkButton: React.FC<{
 
 const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
   <List component="div" disablePadding dense>
-    {Object.entries(songs).map(([songId, { title, artist, url, comment }]) => (
+    {songs.map(([songId, { title, artist, url, comment }]) => (
       <ListItem
         disablePadding
         key={songId}
@@ -130,9 +130,9 @@ const SongListOfArtist: React.FC<{
 
 function uniqByArtist(songs: Songs): { [artist: string]: Songs } {
   const artists: { [artist: string]: Songs } = {};
-  for (const [songId, song] of Object.entries(songs)) {
-    const songsOfTheArtist = artists[song.artist];
-    artists[song.artist] = { ...songsOfTheArtist, [songId]: song };
+  for (const [songId, song] of songs) {
+    const songsOfTheArtist = artists[song.artist] ?? [];
+    artists[song.artist] = [...songsOfTheArtist, [songId, song]];
   }
   return artists;
 }

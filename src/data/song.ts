@@ -19,9 +19,7 @@ export interface Song {
   createdAt?: number;
 }
 
-export interface Songs {
-  [songId: string]: Song;
-}
+export type Songs = [string, Song][];
 
 function isSong(x: any): x is Song {
   return (
@@ -53,10 +51,16 @@ function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
 }
 
 function snapshotToSongs(snapshot: DataSnapshot): Songs {
-  const val = snapshot.val();
-  if (!Object.values(val).every(isSong))
-    throw new Error("Type validation failed: a value of songs is not song");
-  return val;
+  const songs: Songs = [];
+  snapshot.forEach((child) => {
+    const songId = child.key;
+    const song = child.val();
+    if (songId === null) throw new Error("Invalid ID: songId is null");
+    if (!isSong(song))
+      throw new Error("Type validation failed: a value of child is not song");
+    songs.push([songId, song]);
+  });
+  return songs;
 }
 
 async function getAllSongs(): Promise<Songs> {
