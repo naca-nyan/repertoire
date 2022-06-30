@@ -89,9 +89,10 @@ function songCreatedAtNow(song: Song): Song {
 }
 
 export async function pushSong(userId: string, song: Song): Promise<string> {
-  const pKey = [song.title, song.artist, song.url].join(":");
+  const pKeyTitle = (await sha256(song.title)).substring(0,16);
+  const pKeyArtist = (await sha256(song.artist)).substring(0.16);
   // Use first 32 chars of SHA-256 hash
-  const key = (await sha256(pKey)).substring(0, 32);
+  const key = pKeyTitle + pKeyArtist;
   const updates = {
     [`${root}/songs/${key}`]: song,
     [`${root}/users/${userId}/songs/${key}`]: songCreatedAtNow(song),
