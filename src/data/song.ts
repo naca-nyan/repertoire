@@ -93,7 +93,6 @@ export async function pushSong(userId: string, song: Song): Promise<string> {
   // Use first 32 chars of SHA-256 hash
   const key = (await sha256(pKey)).substring(0, 32);
   const updates = {
-    [`${root}/songs/${key}`]: song,
     [`${root}/users/${userId}/songs/${key}`]: songCreatedAtNow(song),
   };
   await update(ref(db), updates);
