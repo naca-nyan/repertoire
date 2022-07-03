@@ -1,6 +1,5 @@
-import { DataSnapshot, onValue, ref } from "firebase/database";
+import { DataSnapshot, onValue, ref, update } from "firebase/database";
 import { database } from "./firebase";
-import { isSong, pushSong } from "./data/song";
 
 function getDataSnapshotOnce(path: string): Promise<DataSnapshot> {
   return new Promise((resolve, reject) =>
@@ -8,17 +7,19 @@ function getDataSnapshotOnce(path: string): Promise<DataSnapshot> {
   );
 }
 
-export async function migrate(from: string) {
-  const snapshot = await getDataSnapshotOnce(from + "/users");
+const userId2uid: { [userId: string]: string } = {};
+
+export async function migrate() {
+  const root = "/v1";
+  const snapshot = await getDataSnapshotOnce(root + "/users");
   snapshot.forEach((userChild) => {
     const userId = userChild.key ?? "unknown";
-    userChild.child("songs").forEach((songChild) => {
-      // eslint-disable-next-line
-      const songId = songChild.key ?? "unknown song";
-      const val = songChild.val();
-      if (!isSong(val)) return;
-      const song = val;
-      pushSong(userId, song);
-    });
+    const uid = userId2uid[userId];
+    const songs = userChild.child("songs").val();
+    const updates = {
+      [`${root}/users/${uid}/songs`]: songs,
+      [`${root}/users/${uid}/screenName`]: userId,
+    };
+    update(ref(database), updates);
   });
 }
