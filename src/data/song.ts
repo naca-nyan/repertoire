@@ -20,7 +20,7 @@ export interface Song {
 
 export type Songs = [string, Song][];
 
-function isSong(x: any): x is Song {
+export function isSong(x: any): x is Song {
   return (
     typeof x.artist === "string" &&
     typeof x.title === "string" &&
