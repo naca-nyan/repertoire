@@ -60,7 +60,7 @@ const BookmarkButton: React.FC<{
     );
   }
   const onClick = () => {
-    setSong(userId, songId, song);
+    setSong(userId, songId, { ...song, createdAt: Date.now() });
   };
   return (
     <Tooltip title="知ってる曲！">

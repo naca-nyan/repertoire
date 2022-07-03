@@ -37,7 +37,7 @@ const MyPageContent: React.FC<{
   }
 
   const onAddSong = (song: Song) => {
-    pushSong(userId, song)
+    pushSong(userId, { ...song, createdAt: Date.now() })
       .then((songId) => setData([...data, [songId, song]]))
       .catch((e) => console.error("cannot push song", song, e));
   };

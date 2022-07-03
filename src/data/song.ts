@@ -6,7 +6,6 @@ import {
   ref,
   remove,
   set,
-  update,
 } from "firebase/database";
 import { database as db } from "../firebase";
 import { sha256 } from "../utils/hash";
@@ -21,7 +20,7 @@ export interface Song {
 
 export type Songs = [string, Song][];
 
-function isSong(x: any): x is Song {
+export function isSong(x: any): x is Song {
   return (
     typeof x.artist === "string" &&
     typeof x.title === "string" &&
@@ -84,19 +83,11 @@ export async function getSongs(userId?: string): Promise<Songs> {
   return await getSongsOfUser(userId);
 }
 
-function songCreatedAtNow(song: Song): Song {
-  return { ...song, createdAt: Date.now() };
-}
-
 export async function pushSong(userId: string, song: Song): Promise<string> {
-  const pKey = [song.title, song.artist, song.url].join(":");
   // Use first 32 chars of SHA-256 hash
-  const key = (await sha256(pKey)).substring(0, 32);
-  const updates = {
-    [`${root}/users/${userId}/songs/${key}`]: songCreatedAtNow(song),
-  };
-  await update(ref(db), updates);
-  return key;
+  const songId = (await sha256(song.url)).substring(0, 32);
+  await setSong(userId, songId, song);
+  return songId;
 }
 
 export async function setSong(
@@ -104,10 +95,7 @@ export async function setSong(
   songId: string,
   song: Song
 ): Promise<void> {
-  return set(
-    ref(db, `${root}/users/${userId}/songs/${songId}`),
-    songCreatedAtNow(song)
-  );
+  return set(ref(db, `${root}/users/${userId}/songs/${songId}`), song);
 }
 
 export async function removeSong(userId: string, songId: string) {
