@@ -1,6 +1,7 @@
 import { User as AuthUser } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import { database } from "../firebase";
+import { root } from "./utils";
 
 export type User = AuthUser & {
   userId: string;
@@ -13,8 +14,6 @@ export function getScreenName(authuser: AuthUser): string {
   const screenName: string | undefined = authuser.reloadUserInfo?.screenName;
   return screenName ?? "";
 }
-
-const root = "/v1";
 
 export function setScreenName(uid: string, screenName: string): Promise<void> {
   return set(ref(database, `${root}/users/${uid}/screenName`), screenName);

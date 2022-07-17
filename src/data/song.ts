@@ -10,6 +10,7 @@ import {
 } from "firebase/database";
 import { database as db } from "../firebase";
 import { sha256 } from "../utils/hash";
+import { root } from "./utils";
 
 export interface Song {
   artist: string;
@@ -39,8 +40,6 @@ export function unpartial(obj: Partial<Song>): Song {
     comment: obj.comment,
   };
 }
-
-const root = "/v1";
 
 function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
   return new Promise((resolve, reject) => {
