@@ -42,7 +42,7 @@ const MyPageContent: React.FC<{
       .catch((e) => console.error("cannot push song", song, e));
   };
 
-  const shareURL = window.location.origin + "/users/" + userId;
+  const shareURL = window.location.origin + "/users/" + user.screenName;
 
   function copyShareURL() {
     navigator.clipboard.writeText(shareURL);
