@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
 
-import { getSongs, Songs } from "../data/song";
+import { getSongsByScreenName, Songs } from "../data/song";
 import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
@@ -86,32 +86,30 @@ const SongPageContent: React.FC<{
 };
 
 const SongPage: React.FC = () => {
-  const { userId: subjectUserId } = useParams();
-  const [subjectData, setSubjectData] = useState<undefined | null | Songs>(
-    undefined
-  );
+  const { screenName } = useParams();
+  const [data, setData] = useState<undefined | null | Songs>(undefined);
 
   useEffect(() => {
-    if (!subjectUserId) {
-      setSubjectData(null);
+    if (!screenName) {
+      setData(null);
       return;
     }
-    getSongs(subjectUserId)
-      .then(setSubjectData)
+    getSongsByScreenName(screenName)
+      .then(setData)
       .catch((e) => {
         console.warn(e);
-        setSubjectData(null);
+        setData(null);
       });
-  }, [subjectUserId]);
+  }, [screenName]);
 
-  if (!subjectUserId) return <NotFoundPage />;
-  if (subjectData === undefined) return <LoadingPage />;
-  if (subjectData === null) return <NotFoundPage />;
+  if (!screenName) return <NotFoundPage />;
+  if (data === undefined) return <LoadingPage />;
+  if (data === null) return <NotFoundPage />;
 
   return (
     <Container maxWidth="sm" sx={{ mt: 3 }}>
-      <Typography variant="h6">@{subjectUserId} さんの知ってる曲</Typography>
-      <SongPageContent data={subjectData} />
+      <Typography variant="h6">@{screenName} さんの知ってる曲</Typography>
+      <SongPageContent data={data} />
     </Container>
   );
 };

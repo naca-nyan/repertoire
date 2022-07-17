@@ -1,5 +1,6 @@
 import {
   DataSnapshot,
+  equalTo,
   onValue,
   orderByChild,
   query,
@@ -9,6 +10,7 @@ import {
 } from "firebase/database";
 import { database as db } from "../firebase";
 import { sha256 } from "../utils/hash";
+import { root } from "./utils";
 
 export interface Song {
   artist: string;
@@ -38,8 +40,6 @@ export function unpartial(obj: Partial<Song>): Song {
     comment: obj.comment,
   };
 }
-
-const root = "/v1";
 
 function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
   return new Promise((resolve, reject) => {
@@ -111,4 +111,29 @@ export function onSongExists(
     const songExists = snapshot.exists();
     callback(songExists);
   });
+}
+
+function getValueQueryOnce(
+  path: string,
+  target: string,
+  value: string
+): Promise<DataSnapshot> {
+  return new Promise((resolve, reject) => {
+    const q = query(ref(db, path), orderByChild(target), equalTo(value));
+    onValue(q, resolve, reject, { onlyOnce: true });
+  });
+}
+
+export async function getSongsByScreenName(screenName: string): Promise<Songs> {
+  const snapshot = await getValueQueryOnce(
+    `${root}/users`,
+    "screenName",
+    screenName
+  );
+  if (!snapshot.exists()) throw new Error("Such screen name does not exist");
+  let userId: string = "";
+  snapshot.forEach((child) => {
+    userId = child.key ?? "";
+  });
+  return getSongs(userId);
 }
