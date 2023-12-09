@@ -54,7 +54,7 @@ const AvatarMenu: React.FC<{ user: User; signOut: () => void }> = ({
   );
 };
 
-const AppHeader: React.FC = () => {
+const AppContainer: React.FC = () => {
   const us = useContext(UserStateContext);
 
   return (
@@ -95,4 +95,4 @@ const AppHeader: React.FC = () => {
   );
 };
 
-export default AppHeader;
+export default AppContainer;

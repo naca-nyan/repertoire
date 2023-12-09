@@ -16,5 +16,6 @@ export function getScreenName(authuser: AuthUser): string {
 }
 
 export function setScreenName(uid: string, screenName: string): Promise<void> {
-  return set(ref(database, `${root}/users/${uid}/screenName`), screenName);
+  const lowerScreenName = screenName.toLowerCase();
+  return set(ref(database, `${root}/users/${uid}/screenName`), lowerScreenName);
 }

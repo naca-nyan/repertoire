@@ -19,14 +19,7 @@ import {
 } from "@mui/icons-material";
 import { onSongExists, removeSong, setSong, Song, Songs } from "../data/song";
 import { UserStateContext } from "../contexts/user";
-
-function labelURL(url: string): string {
-  let label = "";
-  if (url.startsWith("https://ja.chordwiki.org/")) label = "ChordWiki";
-  if (url.startsWith("https://www.ufret.jp/")) label = "U-FRET";
-  const urlDecoded = decodeURIComponent(url);
-  return label ? `${label} (${urlDecoded})` : urlDecoded;
-}
+import { siteNameOf, toURL } from "./utils";
 
 const BookmarkButton: React.FC<{
   songId: string;
@@ -73,28 +66,31 @@ const BookmarkButton: React.FC<{
 
 const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
   <List component="div" disablePadding dense>
-    {songs.map(([songId, { title, artist, url, comment }]) => (
+    {songs.map(([songId, song]) => (
       <ListItem
         disablePadding
         key={songId}
         secondaryAction={
-          <BookmarkButton songId={songId} song={{ title, artist, url }} />
+          <BookmarkButton
+            songId={songId}
+            song={{ title: song.title, artist: song.artist }}
+          />
         }
       >
-        <Tooltip arrow title={labelURL(url)} placement="bottom-start">
+        <Tooltip arrow title={siteNameOf(songId)} placement="bottom-start">
           <ListItemButton
             component="a"
-            href={url}
+            href={toURL(songId, song).href}
             target="_blank"
             rel="noopener"
           >
             <ListItemText>
-              <Link component="span">{title}</Link>
+              <Link component="span">{song.title}</Link>
               <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
               <Typography
                 sx={{ float: "right", color: "#999", fontSize: "1em" }}
               >
-                {comment}
+                {song.comment}
               </Typography>
             </ListItemText>
           </ListItemButton>

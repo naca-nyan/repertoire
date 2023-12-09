@@ -3,6 +3,7 @@ import { Add, Close } from "@mui/icons-material";
 import { Button, Fab, Fade, IconButton, Modal, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { Song } from "../data/song";
+import { fromURL } from "./utils";
 
 const boxStyle = {
   position: "absolute",
@@ -23,22 +24,22 @@ const textfieldStyle = {
 };
 
 interface Props {
-  onAddSong: (song: Song) => void;
+  onAddSong: (songId: string, song: Song) => void;
 }
 
 const SongSubmitForm: React.FC<Props> = (props) => {
   const [open, setOpen] = useState(false);
 
+  const [url, setURL] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
-  const [url, setURL] = useState("");
 
   const [helperText, setHelperText] = useState("");
 
   function clearAndClose() {
+    setURL("");
     setTitle("");
     setArtist("");
-    setURL("");
     setHelperText("");
     setOpen(false);
   }
@@ -52,12 +53,28 @@ const SongSubmitForm: React.FC<Props> = (props) => {
     clearAndClose();
   }
 
+  const setTitleFromUrl = (url: string) => {
+    try {
+      const { songId } = fromURL(new URL(url));
+      if (songId.startsWith("chordwiki:"))
+        setTitle(songId.replace("chordwiki:", ""));
+    } catch (e) {
+      if (e instanceof Error) {
+        setHelperText(e.message);
+      }
+    }
+  };
+
   const handleOnChange: ChangeEventHandler<any> = (e) => {
     const id = e.currentTarget.id;
     const value = e.currentTarget.value;
+    if (id === "url") {
+      setURL(value);
+      setTitleFromUrl(value);
+      return;
+    }
     if (id === "title") setTitle(value);
     if (id === "artist") setArtist(value);
-    if (id === "url") setURL(value);
     if (helperText) validate();
   };
 
@@ -72,13 +89,18 @@ const SongSubmitForm: React.FC<Props> = (props) => {
 
   const handleClickAdd = () => {
     if (!validate()) return;
-    const song = {
-      artist,
-      title,
-      url,
-    };
-    props.onAddSong(song);
-    clearAndClose();
+    try {
+      const { songId, key, symbol } = fromURL(new URL(url));
+      const song: Song = { artist, title };
+      if (key) song.key = key;
+      if (symbol) song.symbol = symbol;
+      props.onAddSong(songId, song);
+      clearAndClose();
+    } catch (e) {
+      if (e instanceof Error) {
+        setHelperText(e.message);
+      }
+    }
   };
 
   return (
@@ -114,8 +136,18 @@ const SongSubmitForm: React.FC<Props> = (props) => {
               <Close />
             </IconButton>
             <TextField
+              id="url"
+              label="URL"
+              autoComplete="off"
+              error={Boolean(helperText)}
+              onChange={handleOnChange}
+              sx={textfieldStyle}
+              helperText={helperText}
+            />
+            <TextField
               id="title"
               label="曲名"
+              value={title}
               autoComplete="off"
               error={Boolean(helperText)}
               onChange={handleOnChange}
@@ -127,15 +159,6 @@ const SongSubmitForm: React.FC<Props> = (props) => {
               error={Boolean(helperText)}
               onChange={handleOnChange}
               sx={textfieldStyle}
-            />
-            <TextField
-              id="url"
-              label="URL"
-              autoComplete="off"
-              error={Boolean(helperText)}
-              onChange={handleOnChange}
-              sx={textfieldStyle}
-              helperText={helperText}
             />
             <Button
               variant="contained"
