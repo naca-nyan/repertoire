@@ -3,6 +3,7 @@ import { Add, Close } from "@mui/icons-material";
 import { Button, Fab, Fade, IconButton, Modal, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { Song } from "../data/song";
+import { fromURL } from "./utils";
 
 const boxStyle = {
   position: "absolute",
@@ -21,67 +22,6 @@ const textfieldStyle = {
   width: "100%",
   mb: 4,
 };
-
-function parseSongFrom(url: URL): {
-  songId: string;
-  key?: number;
-  symbol?: string;
-} {
-  if (url.host === "ja.chordwiki.org") {
-    // https://ja.chordwiki.org/wiki/%E3%81%8B%E3%82%89%E3%81%8F%E3%82%8A%E3%83%94%E3%82%A8%E3%83%AD
-    if (url.pathname.startsWith("/wiki/")) {
-      const idEncoded = url.pathname.split("/").pop() ?? "";
-      const id = decodeURIComponent(idEncoded).replaceAll("+", " ");
-      if (!id) throw new Error("Empty songId parsing ja.chordwiki.org");
-      return { songId: `chordwiki:${id}` };
-    }
-    // https://ja.chordwiki.org/wiki.cgi?c=view&t=%E3%83%8B%E3%83%A3%E3%83%BC%E3%82%B9%E3%81%AE%E3%81%86%E3%81%9F&key=2&symbol=
-    if (url.pathname.startsWith("/wiki.cgi")) {
-      const id = decodeURIComponent(url.searchParams.get("t") ?? "");
-      const key = parseInt(url.searchParams.get("key") ?? "0");
-      const symbol = url.searchParams.get("symbol");
-      if (!id)
-        throw new Error(
-          "Empty songId parsing ja.chordwiki.org with key or symbol"
-        );
-      return {
-        songId: `chordwiki:${id}`,
-        key: key || undefined,
-        symbol: symbol || undefined,
-      };
-    }
-  }
-  if (url.host === "gakufu.gakki.me") {
-    // https://gakufu.gakki.me/m/data/N13285.html
-    if (url.pathname.endsWith(".html")) {
-      const filename = url.pathname.split("/").pop() ?? "";
-      const id = filename.replace(".html", "");
-      if (!id) throw new Error("Empty songId parsing gakufu.gakki.me");
-      return { songId: `gakkime:${id}` };
-    }
-    // https://gakufu.gakki.me/p/index.php?p=N12380&k=#rpA
-    if (url.pathname.endsWith(".php")) {
-      const id = url.searchParams.get("p");
-      const keyText = url.searchParams.get("k") ?? "";
-      const key = parseInt(keyText.replace("m", "-").replace("p", "+"));
-      if (!id) throw new Error("Empty songId parsing gakufu.gakki.me with key");
-      return { songId: `gakkime:${id}`, key: key || undefined };
-    }
-  }
-  // https://www.ufret.jp/song.php?data=92548
-  if (url.host === "www.ufret.jp") {
-    const id = url.searchParams.get("data");
-    if (!id) throw new Error("Empty songId parsing www.ufret.jp");
-    return { songId: `ufret:${id}` };
-  }
-  // https://www.youtube.com/watch?v=TkroHwQYpFE
-  if (url.host === "www.youtube.com") {
-    const id = url.searchParams.get("v");
-    if (!id) throw new Error("Empty songId parsing www.youtube.com");
-    return { songId: `youtube:${id}` };
-  }
-  throw new Error("Unknown url " + url.href);
-}
 
 interface Props {
   onAddSong: (songId: string, song: Song) => void;
@@ -115,7 +55,7 @@ const SongSubmitForm: React.FC<Props> = (props) => {
 
   const setTitleFromUrl = (url: string) => {
     try {
-      const { songId } = parseSongFrom(new URL(url));
+      const { songId } = fromURL(new URL(url));
       if (songId.startsWith("chordwiki:"))
         setTitle(songId.replace("chordwiki:", ""));
     } catch (e) {
@@ -150,7 +90,7 @@ const SongSubmitForm: React.FC<Props> = (props) => {
   const handleClickAdd = () => {
     if (!validate()) return;
     try {
-      const { songId, key, symbol } = parseSongFrom(new URL(url));
+      const { songId, key, symbol } = fromURL(new URL(url));
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;

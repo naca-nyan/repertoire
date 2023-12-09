@@ -19,51 +19,7 @@ import {
 } from "@mui/icons-material";
 import { onSongExists, removeSong, setSong, Song, Songs } from "../data/song";
 import { UserStateContext } from "../contexts/user";
-
-function labelURL(songId: string): string {
-  if (songId.startsWith("chordwiki:")) return "ChordWiki";
-  if (songId.startsWith("gakkime:")) return "楽器.me";
-  if (songId.startsWith("ufret:")) return "U-FRET";
-  if (songId.startsWith("youtube:")) return "YouTube";
-  return "";
-}
-
-function constructURL(songId: string, song: Song): string {
-  if (songId.startsWith("chordwiki:")) {
-    const id = songId.replace("chordwiki:", "");
-    const url = new URL("https://ja.chordwiki.org");
-    if (song.key || song.symbol) {
-      url.pathname = "/wiki.cgi";
-      url.searchParams.set("c", "view");
-      url.searchParams.set("t", id);
-      url.searchParams.set("key", song.key?.toString() ?? "");
-      url.searchParams.set("symbol", song.symbol ?? "");
-      return url.href;
-    }
-    url.pathname = "/wiki/" + encodeURIComponent(id).replaceAll("%20", "+");
-    return url.href;
-  }
-  if (songId.startsWith("gakkime:")) {
-    const id = songId.replace("gakkime:", "");
-    const url = new URL("https://gakufu.gakki.me/m/index.php");
-    url.searchParams.set("p", id);
-    if (song.key) url.searchParams.set("k", song.key.toString());
-    return url.href;
-  }
-  if (songId.startsWith("ufret:")) {
-    const id = songId.replace("ufret:", "");
-    const url = new URL("https://www.ufret.jp/song.php");
-    url.searchParams.set("data", id);
-    return url.href;
-  }
-  if (songId.startsWith("youtube:")) {
-    const id = songId.replace("youtube:", "");
-    const url = new URL("https://www.youtube.com/watch");
-    url.searchParams.set("v", id);
-    return url.href;
-  }
-  return "";
-}
+import { siteNameOf, toURL } from "./utils";
 
 const BookmarkButton: React.FC<{
   songId: string;
@@ -121,10 +77,10 @@ const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
           />
         }
       >
-        <Tooltip arrow title={labelURL(songId)} placement="bottom-start">
+        <Tooltip arrow title={siteNameOf(songId)} placement="bottom-start">
           <ListItemButton
             component="a"
-            href={constructURL(songId, song)}
+            href={toURL(songId, song).href}
             target="_blank"
             rel="noopener"
           >
