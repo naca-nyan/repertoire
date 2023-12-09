@@ -20,12 +20,49 @@ import {
 import { onSongExists, removeSong, setSong, Song, Songs } from "../data/song";
 import { UserStateContext } from "../contexts/user";
 
-function labelURL(url: string): string {
-  let label = "";
-  if (url.startsWith("https://ja.chordwiki.org/")) label = "ChordWiki";
-  if (url.startsWith("https://www.ufret.jp/")) label = "U-FRET";
-  const urlDecoded = decodeURIComponent(url);
-  return label ? `${label} (${urlDecoded})` : urlDecoded;
+function labelURL(songId: string): string {
+  if (songId.startsWith("chordwiki:")) return "ChordWiki";
+  if (songId.startsWith("gakkime:")) return "楽器.me";
+  if (songId.startsWith("ufret:")) return "U-FRET";
+  if (songId.startsWith("youtube:")) return "YouTube";
+  return "";
+}
+
+function constructURL(songId: string, song: Song): string {
+  if (songId.startsWith("chordwiki:")) {
+    const id = songId.replace("chordwiki:", "");
+    const url = new URL("https://ja.chordwiki.org");
+    if (song.key || song.symbol) {
+      url.pathname = "/wiki.cgi";
+      url.searchParams.set("c", "view");
+      url.searchParams.set("t", id);
+      url.searchParams.set("key", song.key?.toString() ?? "");
+      url.searchParams.set("symbol", song.symbol ?? "");
+      return url.href;
+    }
+    url.pathname = "/wiki/" + encodeURIComponent(id).replaceAll("%20", "+");
+    return url.href;
+  }
+  if (songId.startsWith("gakkime:")) {
+    const id = songId.replace("gakkime:", "");
+    const url = new URL("https://gakufu.gakki.me/m/index.php");
+    url.searchParams.set("p", id);
+    if (song.key) url.searchParams.set("k", song.key.toString());
+    return url.href;
+  }
+  if (songId.startsWith("ufret:")) {
+    const id = songId.replace("ufret:", "");
+    const url = new URL("https://www.ufret.jp/song.php");
+    url.searchParams.set("data", id);
+    return url.href;
+  }
+  if (songId.startsWith("youtube:")) {
+    const id = songId.replace("youtube:", "");
+    const url = new URL("https://www.youtube.com/watch");
+    url.searchParams.set("v", id);
+    return url.href;
+  }
+  return "";
 }
 
 const BookmarkButton: React.FC<{
@@ -73,28 +110,31 @@ const BookmarkButton: React.FC<{
 
 const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
   <List component="div" disablePadding dense>
-    {songs.map(([songId, { title, artist, url, comment }]) => (
+    {songs.map(([songId, song]) => (
       <ListItem
         disablePadding
         key={songId}
         secondaryAction={
-          <BookmarkButton songId={songId} song={{ title, artist, url }} />
+          <BookmarkButton
+            songId={songId}
+            song={{ title: song.title, artist: song.artist }}
+          />
         }
       >
-        <Tooltip arrow title={labelURL(url)} placement="bottom-start">
+        <Tooltip arrow title={labelURL(songId)} placement="bottom-start">
           <ListItemButton
             component="a"
-            href={url}
+            href={constructURL(songId, song)}
             target="_blank"
             rel="noopener"
           >
             <ListItemText>
-              <Link component="span">{title}</Link>
+              <Link component="span">{song.title}</Link>
               <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
               <Typography
                 sx={{ float: "right", color: "#999", fontSize: "1em" }}
               >
-                {comment}
+                {song.comment}
               </Typography>
             </ListItemText>
           </ListItemButton>

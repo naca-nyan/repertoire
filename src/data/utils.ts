@@ -1,2 +1,2 @@
 // Database root
-export const root = "/v1";
+export const root = "/v2";

@@ -22,23 +22,84 @@ const textfieldStyle = {
   mb: 4,
 };
 
+function parseSongFrom(url: URL): {
+  songId: string;
+  key?: number;
+  symbol?: string;
+} {
+  if (url.host === "ja.chordwiki.org") {
+    // https://ja.chordwiki.org/wiki/%E3%81%8B%E3%82%89%E3%81%8F%E3%82%8A%E3%83%94%E3%82%A8%E3%83%AD
+    if (url.pathname.startsWith("/wiki/")) {
+      const idEncoded = url.pathname.split("/").pop() ?? "";
+      const id = decodeURIComponent(idEncoded).replaceAll("+", " ");
+      if (!id) throw new Error("Empty songId parsing ja.chordwiki.org");
+      return { songId: `chordwiki:${id}` };
+    }
+    // https://ja.chordwiki.org/wiki.cgi?c=view&t=%E3%83%8B%E3%83%A3%E3%83%BC%E3%82%B9%E3%81%AE%E3%81%86%E3%81%9F&key=2&symbol=
+    if (url.pathname.startsWith("/wiki.cgi")) {
+      const id = decodeURIComponent(url.searchParams.get("t") ?? "");
+      const key = parseInt(url.searchParams.get("key") ?? "0");
+      const symbol = url.searchParams.get("symbol");
+      if (!id)
+        throw new Error(
+          "Empty songId parsing ja.chordwiki.org with key or symbol"
+        );
+      return {
+        songId: `chordwiki:${id}`,
+        key: key || undefined,
+        symbol: symbol || undefined,
+      };
+    }
+  }
+  if (url.host === "gakufu.gakki.me") {
+    // https://gakufu.gakki.me/m/data/N13285.html
+    if (url.pathname.endsWith(".html")) {
+      const filename = url.pathname.split("/").pop() ?? "";
+      const id = filename.replace(".html", "");
+      if (!id) throw new Error("Empty songId parsing gakufu.gakki.me");
+      return { songId: `gakkime:${id}` };
+    }
+    // https://gakufu.gakki.me/p/index.php?p=N12380&k=#rpA
+    if (url.pathname.endsWith(".php")) {
+      const id = url.searchParams.get("p");
+      const keyText = url.searchParams.get("k") ?? "";
+      const key = parseInt(keyText.replace("m", "-").replace("p", "+"));
+      if (!id) throw new Error("Empty songId parsing gakufu.gakki.me with key");
+      return { songId: `gakkime:${id}`, key: key || undefined };
+    }
+  }
+  // https://www.ufret.jp/song.php?data=92548
+  if (url.host === "www.ufret.jp") {
+    const id = url.searchParams.get("data");
+    if (!id) throw new Error("Empty songId parsing www.ufret.jp");
+    return { songId: `ufret:${id}` };
+  }
+  // https://www.youtube.com/watch?v=TkroHwQYpFE
+  if (url.host === "www.youtube.com") {
+    const id = url.searchParams.get("v");
+    if (!id) throw new Error("Empty songId parsing www.youtube.com");
+    return { songId: `youtube:${id}` };
+  }
+  throw new Error("Unknown url " + url.href);
+}
+
 interface Props {
-  onAddSong: (song: Song) => void;
+  onAddSong: (songId: string, song: Song) => void;
 }
 
 const SongSubmitForm: React.FC<Props> = (props) => {
   const [open, setOpen] = useState(false);
 
+  const [url, setURL] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
-  const [url, setURL] = useState("");
 
   const [helperText, setHelperText] = useState("");
 
   function clearAndClose() {
+    setURL("");
     setTitle("");
     setArtist("");
-    setURL("");
     setHelperText("");
     setOpen(false);
   }
@@ -52,12 +113,28 @@ const SongSubmitForm: React.FC<Props> = (props) => {
     clearAndClose();
   }
 
+  const setTitleFromUrl = (url: string) => {
+    try {
+      const { songId } = parseSongFrom(new URL(url));
+      if (songId.startsWith("chordwiki:"))
+        setTitle(songId.replace("chordwiki:", ""));
+    } catch (e) {
+      if (e instanceof Error) {
+        setHelperText(e.message);
+      }
+    }
+  };
+
   const handleOnChange: ChangeEventHandler<any> = (e) => {
     const id = e.currentTarget.id;
     const value = e.currentTarget.value;
+    if (id === "url") {
+      setURL(value);
+      setTitleFromUrl(value);
+      return;
+    }
     if (id === "title") setTitle(value);
     if (id === "artist") setArtist(value);
-    if (id === "url") setURL(value);
     if (helperText) validate();
   };
 
@@ -72,13 +149,18 @@ const SongSubmitForm: React.FC<Props> = (props) => {
 
   const handleClickAdd = () => {
     if (!validate()) return;
-    const song = {
-      artist,
-      title,
-      url,
-    };
-    props.onAddSong(song);
-    clearAndClose();
+    try {
+      const { songId, key, symbol } = parseSongFrom(new URL(url));
+      const song: Song = { artist, title };
+      if (key) song.key = key;
+      if (symbol) song.symbol = symbol;
+      props.onAddSong(songId, song);
+      clearAndClose();
+    } catch (e) {
+      if (e instanceof Error) {
+        setHelperText(e.message);
+      }
+    }
   };
 
   return (
@@ -114,8 +196,18 @@ const SongSubmitForm: React.FC<Props> = (props) => {
               <Close />
             </IconButton>
             <TextField
+              id="url"
+              label="URL"
+              autoComplete="off"
+              error={Boolean(helperText)}
+              onChange={handleOnChange}
+              sx={textfieldStyle}
+              helperText={helperText}
+            />
+            <TextField
               id="title"
               label="曲名"
+              value={title}
               autoComplete="off"
               error={Boolean(helperText)}
               onChange={handleOnChange}
@@ -127,15 +219,6 @@ const SongSubmitForm: React.FC<Props> = (props) => {
               error={Boolean(helperText)}
               onChange={handleOnChange}
               sx={textfieldStyle}
-            />
-            <TextField
-              id="url"
-              label="URL"
-              autoComplete="off"
-              error={Boolean(helperText)}
-              onChange={handleOnChange}
-              sx={textfieldStyle}
-              helperText={helperText}
             />
             <Button
               variant="contained"

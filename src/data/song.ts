@@ -9,13 +9,13 @@ import {
   set,
 } from "firebase/database";
 import { database as db } from "../firebase";
-import { sha256 } from "../utils/hash";
 import { root } from "./utils";
 
 export interface Song {
   artist: string;
   title: string;
-  url: string;
+  key?: number;
+  symbol?: string;
   comment?: string;
   createdAt?: number;
 }
@@ -26,18 +26,18 @@ export function isSong(x: any): x is Song {
   return (
     typeof x.artist === "string" &&
     typeof x.title === "string" &&
-    typeof x.url === "string" &&
+    ["number", "undefined"].includes(typeof x.key) &&
+    ["string", "undefined"].includes(typeof x.symbol) &&
     ["string", "undefined"].includes(typeof x.comment) &&
     ["number", "undefined"].includes(typeof x.createdAt)
   );
 }
 
-export function unpartial(obj: Partial<Song>): Song {
+export function unpartial(song: Partial<Song>): Song {
   return {
-    artist: obj.artist ?? "",
-    title: obj.title ?? "",
-    url: obj.url ?? "",
-    comment: obj.comment,
+    ...song,
+    artist: song.artist ?? "",
+    title: song.title ?? "",
   };
 }
 
@@ -83,9 +83,11 @@ export async function getSongs(userId?: string): Promise<Songs> {
   return await getSongsOfUser(userId);
 }
 
-export async function pushSong(userId: string, song: Song): Promise<string> {
-  // Use first 32 chars of SHA-256 hash
-  const songId = (await sha256(song.url)).substring(0, 32);
+export async function pushSong(
+  userId: string,
+  songId: string,
+  song: Song
+): Promise<string> {
   await setSong(userId, songId, song);
   return songId;
 }
