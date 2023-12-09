@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AppHeader from "./components/AppHeader";
+import AppContainer from "./components/AppContainer";
 import TopPage from "./pages/TopPage";
 import SongPage from "./pages/SongPage";
 import MyPage from "./pages/MyPage";
@@ -38,7 +38,7 @@ const App: React.FC = () => {
     <UserStateContext.Provider value={userState}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AppHeader />}>
+          <Route path="/" element={<AppContainer />}>
             <Route path="" element={<TopPage />} />
             <Route path="users/:screenName" element={<SongPage />} />
             <Route path="mypage" element={<MyPage />} />
