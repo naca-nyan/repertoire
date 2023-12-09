@@ -125,10 +125,11 @@ function getValueQueryOnce(
 }
 
 export async function getSongsByScreenName(screenName: string): Promise<Songs> {
+  const lowerScreenName = screenName.toLocaleLowerCase();
   const snapshot = await getValueQueryOnce(
     `${root}/users`,
     "screenName",
-    screenName
+    lowerScreenName
   );
   if (!snapshot.exists()) throw new Error("Such screen name does not exist");
   let userId: string = "";

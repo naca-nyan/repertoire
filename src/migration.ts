@@ -80,3 +80,15 @@ export async function migrate() {
     update(ref(database), updates);
   });
 }
+
+export async function setScreenNameLower() {
+  const snapshot = await getDataSnapshotOnce("v2/users");
+  snapshot.forEach((user) => {
+    const uid = user.key ?? "unknown";
+    const screenName = user.child("screenName").val();
+    const updates = {
+      [`v2/users/${uid}/screenName`]: screenName.toLocaleLowerCase(),
+    };
+    update(ref(database), updates);
+  });
+}
