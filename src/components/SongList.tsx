@@ -119,7 +119,10 @@ const SongListOfArtist: React.FC<{
   const [open, setOpen] = useState(props.open ?? true);
   return (
     <Card sx={{ marginBottom: 2 }}>
-      <ListItemButton onClick={() => setOpen(!open)}>
+      <ListItemButton
+        onClick={() => setOpen(!open)}
+        sx={{ paddingRight: "10px" }}
+      >
         <ListItemText
           primary={artist}
           primaryTypographyProps={{ fontWeight: "bold" }}
