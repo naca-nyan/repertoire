@@ -1,15 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Box,
-  IconButton,
-  List,
-  Paper,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import LoadingPage from "./LoadingPage";
-import { getSongs, pushSong, Song, Songs } from "../data/song";
+import { getSongs, pushSong, Song, SongEntries } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
@@ -21,7 +14,7 @@ const MyPageContent: React.FC<{
   user: User;
 }> = ({ user }) => {
   const userId = user.userId;
-  const [data, setData] = useState<undefined | Songs>(undefined);
+  const [data, setData] = useState<undefined | SongEntries>(undefined);
 
   useEffect(() => {
     getSongs(userId)
@@ -49,7 +42,7 @@ const MyPageContent: React.FC<{
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 3 }}>
+    <Container maxWidth="xl" sx={{ mt: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h5">
           {user.displayName}の知ってる曲リスト
@@ -60,11 +53,7 @@ const MyPageContent: React.FC<{
           </Tooltip>
         </Typography>
       </Box>
-      <Paper elevation={3} sx={{ mt: 2 }}>
-        <List component="nav" dense>
-          <SongList data={data} collapsed={false} />
-        </List>
-      </Paper>
+      <SongList data={data} collapsed={false} />
       <SongSubmitForm onAddSong={onAddSong} />
     </Container>
   );

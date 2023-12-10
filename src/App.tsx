@@ -5,7 +5,11 @@ import SongPage from "./pages/SongPage";
 import MyPage from "./pages/MyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { defaultUserState, UserState, UserStateContext } from "./contexts/user";
-import { signInWithRedirect, signOut as authSignOut } from "firebase/auth";
+import {
+  signInWithRedirect,
+  signOut as authSignOut,
+  updateProfile,
+} from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth, provider } from "./firebase";
 import { getScreenName, setScreenName } from "./data/user";
@@ -27,6 +31,9 @@ const App: React.FC = () => {
         const userId = authUser.uid;
         const screenName = getScreenName(authUser);
         if (screenName) setScreenName(userId, screenName);
+        const photoURL = authUser.providerData[0]?.photoURL;
+        if (photoURL && photoURL !== authUser.photoURL)
+          updateProfile(authUser, { photoURL });
         const user = { ...authUser, userId, screenName };
         userState = { state: "signed in", user, signOut };
       }
