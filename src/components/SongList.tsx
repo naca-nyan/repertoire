@@ -16,7 +16,6 @@ import {
   BookmarkBorder,
   ExpandLess,
   ExpandMore,
-  OpenInNew,
 } from "@mui/icons-material";
 import {
   onSongExists,
@@ -95,7 +94,6 @@ const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
         <ListItemText>
           <SiteIcon kind={siteKind(songId)} />
           <Link component="span">{song.title}</Link>
-          <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
           <Typography sx={{ float: "right", color: "#999", fontSize: "1em" }}>
             {song.comment}
           </Typography>
