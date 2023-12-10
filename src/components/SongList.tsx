@@ -1,4 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  MouseEventHandler,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   Card,
   Collapse,
@@ -11,12 +16,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import {
-  Bookmark,
-  BookmarkBorder,
-  ExpandLess,
-  ExpandMore,
-} from "@mui/icons-material";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import StarIcon from "@mui/icons-material/Star";
 import {
   onSongExists,
   removeSong,
@@ -29,7 +30,22 @@ import { siteKind, siteNames, toURL } from "./utils";
 import { Theme } from "@mui/material";
 import SiteIcon from "./SiteIcon";
 
-const BookmarkButton: React.FC<{
+const Star: React.FC<{
+  title: string;
+  stard?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+}> = ({ stard, title, onClick }) => (
+  <Tooltip title={title}>
+    <IconButton edge="end" onClick={onClick}>
+      <StarIcon
+        fontSize="small"
+        sx={{ color: stard ? "#f59e0b" : undefined }}
+      />
+    </IconButton>
+  </Tooltip>
+);
+
+const StarButton: React.FC<{
   songId: string;
   song: Song;
 }> = ({ songId, song }) => {
@@ -41,34 +57,24 @@ const BookmarkButton: React.FC<{
     onSongExists(userId, songId, setBookmarked);
   }, [userId, songId]);
 
-  if (userId === null) {
-    return (
-      <Tooltip title="知ってる曲を登録するにはログイン！">
-        <BookmarkBorder />
-      </Tooltip>
-    );
-  }
-  const onClickAdded = () => {
-    removeSong(userId, songId);
-  };
+  if (userId === null)
+    return <Star title="知ってる曲を登録するにはログイン！" />;
   if (bookmarked) {
     return (
-      <Tooltip title="知ってる曲に登録済み">
-        <IconButton onClick={onClickAdded} edge="end">
-          <Bookmark />
-        </IconButton>
-      </Tooltip>
+      <Star
+        stard
+        title="知ってる曲から削除する"
+        onClick={() => removeSong(userId, songId)}
+      />
     );
   }
-  const onClick = () => {
-    setSong(userId, songId, { ...song, createdAt: Date.now() });
-  };
   return (
-    <Tooltip title="知ってる曲！">
-      <IconButton onClick={onClick} edge="end">
-        <BookmarkBorder />
-      </IconButton>
-    </Tooltip>
+    <Star
+      title="知ってる曲に登録する！"
+      onClick={() =>
+        setSong(userId, songId, { ...song, createdAt: Date.now() })
+      }
+    />
   );
 };
 
@@ -78,7 +84,7 @@ const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
   <ListItem
     disablePadding
     secondaryAction={
-      <BookmarkButton
+      <StarButton
         songId={songId}
         song={{ title: song.title, artist: song.artist }}
       />
