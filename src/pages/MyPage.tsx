@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import LoadingPage from "./LoadingPage";
 import { getSongs, pushSong, Song, SongEntries } from "../data/song";
@@ -42,7 +42,7 @@ const MyPageContent: React.FC<{
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 3 }}>
+    <Container maxWidth="xl" sx={{ mt: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h5">
           {user.displayName}の知ってる曲リスト
@@ -53,9 +53,7 @@ const MyPageContent: React.FC<{
           </Tooltip>
         </Typography>
       </Box>
-      <Paper elevation={3} sx={{ mt: 2 }}>
-        <SongList data={data} collapsed={false} />
-      </Paper>
+      <SongList data={data} collapsed={false} />
       <SongSubmitForm onAddSong={onAddSong} />
     </Container>
   );

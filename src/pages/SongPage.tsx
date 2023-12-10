@@ -13,7 +13,6 @@ import {
   Divider,
   Input,
   ListSubheader,
-  Paper,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -76,9 +75,7 @@ const SongPageContent: React.FC<{
   const filter = debouncedSearchWord;
   const filtered = filter ? filterSongs(data, filter) : data;
   return (
-    <Paper elevation={3} sx={{ mt: 2 }}>
-      <SongList data={filtered} collapsed={collapsed} subheader={subheader} />
-    </Paper>
+    <SongList data={filtered} collapsed={collapsed} subheader={subheader} />
   );
 };
 
@@ -104,7 +101,7 @@ const SongPage: React.FC = () => {
   if (data === null) return <NotFoundPage />;
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 3 }}>
+    <Container maxWidth="xl" sx={{ mt: 3 }}>
       <Typography variant="h6">@{screenName} さんの知ってる曲</Typography>
       <SongPageContent data={data} />
     </Container>

@@ -113,7 +113,7 @@ const SongSubmitForm: React.FC<Props> = (props) => {
       />
       <Box
         sx={{
-          maxWidth: "sm",
+          maxWidth: "xl",
           width: "100%",
           position: "fixed",
           bottom: 24,

@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
+  Card,
   Collapse,
   IconButton,
   Link,
@@ -26,6 +27,7 @@ import {
 } from "../data/song";
 import { UserStateContext } from "../contexts/user";
 import { siteNameOf, toURL } from "./utils";
+import { Theme } from "@mui/material";
 
 const BookmarkButton: React.FC<{
   songId: string;
@@ -110,7 +112,7 @@ const SongListOfArtist: React.FC<{
   useEffect(() => setOpen(props.open ?? true), [props.open]);
   const [open, setOpen] = useState(props.open ?? true);
   return (
-    <List disablePadding dense>
+    <Card sx={{ marginBottom: 2 }}>
       <ListItemButton onClick={() => setOpen(!open)}>
         <ListItemText
           primary={artist}
@@ -123,7 +125,7 @@ const SongListOfArtist: React.FC<{
           <SongItem songEntry={[songId, song]} key={songId} />
         ))}
       </Collapse>
-    </List>
+    </Card>
   );
 };
 
@@ -142,8 +144,14 @@ const SongList: React.FC<{
   subheader?: React.ReactNode;
 }> = ({ data, collapsed, subheader }) => {
   const uniq = uniqByArtist(data);
+  const styles = (theme: Theme) => ({
+    [theme.breakpoints.up("sm")]: { columnCount: 2 },
+    [theme.breakpoints.up("md")]: { columnCount: 3 },
+    [theme.breakpoints.up("lg")]: { columnCount: 4 },
+    [theme.breakpoints.up("xl")]: { columnCount: 5 },
+  });
   return (
-    <List dense subheader={subheader}>
+    <List dense subheader={subheader} sx={styles}>
       {Object.entries(uniq).map(([artist, songs]) => (
         <SongListOfArtist
           key={artist}
