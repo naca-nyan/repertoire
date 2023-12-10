@@ -141,8 +141,7 @@ function uniqByArtist(songEntries: SongEntries): Record<string, SongEntries> {
 const SongList: React.FC<{
   data: SongEntries;
   collapsed: boolean;
-  subheader?: React.ReactNode;
-}> = ({ data, collapsed, subheader }) => {
+}> = ({ data, collapsed }) => {
   const uniq = uniqByArtist(data);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
@@ -151,7 +150,7 @@ const SongList: React.FC<{
     [theme.breakpoints.up("xl")]: { columnCount: 5 },
   });
   return (
-    <List dense subheader={subheader} sx={styles}>
+    <List dense sx={styles}>
       {Object.entries(uniq).map(([artist, songs]) => (
         <SongListOfArtist
           key={artist}

@@ -1,48 +1,12 @@
-import React, {
-  ChangeEventHandler,
-  MouseEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDebounce } from "react-use";
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Input,
-  ListSubheader,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
 import { getSongsByScreenName, SongEntries } from "../data/song";
 import SongList from "../components/SongList";
+import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
-
-const SongListSubHeader: React.FC<{
-  collapsed: boolean;
-  onChangeSearchWord: ChangeEventHandler<HTMLInputElement>;
-  onClickToggleButton: MouseEventHandler;
-}> = ({ collapsed, onChangeSearchWord, onClickToggleButton }) => {
-  return (
-    <ListSubheader component="div">
-      <Toolbar>
-        <Box sx={{ display: "flex", alignItems: "flex-end", flexGrow: 1 }}>
-          <Search sx={{ my: 0.5, mr: 1 }} />
-          <Input placeholder="Search..." onChange={onChangeSearchWord} />
-        </Box>
-        <Button size="small" onClick={onClickToggleButton}>
-          {collapsed ? "Open" : "Close"} All
-        </Button>
-      </Toolbar>
-      <Divider />
-    </ListSubheader>
-  );
-};
 
 function filterSongs(songEntries: SongEntries, filter: string): SongEntries {
   const filterLowerCase = filter.toLowerCase();
@@ -59,23 +23,30 @@ function filterSongs(songEntries: SongEntries, filter: string): SongEntries {
 }
 
 const SongPageContent: React.FC<{
+  screenName: string;
   data: SongEntries;
-}> = ({ data }) => {
-  const [searchWord, setSearchWord] = useState("");
-  const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
-  useDebounce(() => setDebouncedSearchWord(searchWord), 300, [searchWord]);
-
+}> = ({ screenName, data }) => {
   const [collapsed, setCollapsed] = useState(false);
-
-  const subheader = SongListSubHeader({
-    collapsed,
-    onChangeSearchWord: (e) => setSearchWord(e.currentTarget.value),
-    onClickToggleButton: () => setCollapsed(!collapsed),
-  });
-  const filter = debouncedSearchWord;
+  const [filter, setFilter] = useState("");
   const filtered = filter ? filterSongs(data, filter) : data;
   return (
-    <SongList data={filtered} collapsed={collapsed} subheader={subheader} />
+    <>
+      <Stack direction="row">
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          @{screenName} さんの知ってる曲
+        </Typography>
+        <Button
+          onClick={() => setCollapsed(!collapsed)}
+          sx={{ textAlign: "right" }}
+        >
+          {collapsed ? "Open" : "Close"} All
+        </Button>
+      </Stack>
+      <Box sx={{ marginTop: 1, marginBottom: 2 }}>
+        <SearchBar onInput={(v) => setFilter(v)} />
+      </Box>
+      <SongList data={filtered} collapsed={collapsed} />
+    </>
   );
 };
 
@@ -102,8 +73,7 @@ const SongPage: React.FC = () => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
-      <Typography variant="h6">@{screenName} さんの知ってる曲</Typography>
-      <SongPageContent data={data} />
+      <SongPageContent screenName={screenName} data={data} />
     </Container>
   );
 };
