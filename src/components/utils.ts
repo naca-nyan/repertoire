@@ -7,20 +7,20 @@ export const songIdPrefixes = [
 
 export type SiteKind = (typeof songIdPrefixes)[number];
 
-const siteNames: Record<SiteKind, string> = {
+export const siteNames: Record<SiteKind, string> = {
   chordwiki: "ChordWiki",
   gakkime: "楽器.me",
   ufret: "U-FRET",
   youtube: "YouTube",
 };
 
-export function siteNameOf(songId: string): string {
+export function siteKind(songId: string): SiteKind {
   for (const p of songIdPrefixes) {
     if (songId.startsWith(p + ":")) {
-      return siteNames[p];
+      return p;
     }
   }
-  return "";
+  throw new Error("Unknown songId");
 }
 
 export function fromURL(url: URL): {

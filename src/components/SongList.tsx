@@ -26,8 +26,9 @@ import {
   SongEntries,
 } from "../data/song";
 import { UserStateContext } from "../contexts/user";
-import { siteNameOf, toURL } from "./utils";
+import { siteKind, siteNames, toURL } from "./utils";
 import { Theme } from "@mui/material";
+import SiteIcon from "./SiteIcon";
 
 const BookmarkButton: React.FC<{
   songId: string;
@@ -84,7 +85,7 @@ const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
       />
     }
   >
-    <Tooltip arrow title={siteNameOf(songId)} placement="bottom-start">
+    <Tooltip arrow title={siteNames[siteKind(songId)]} placement="left">
       <ListItemButton
         component="a"
         href={toURL(songId, song).href}
@@ -92,6 +93,7 @@ const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
         rel="noopener"
       >
         <ListItemText>
+          <SiteIcon kind={siteKind(songId)} />
           <Link component="span">{song.title}</Link>
           <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
           <Typography sx={{ float: "right", color: "#999", fontSize: "1em" }}>
