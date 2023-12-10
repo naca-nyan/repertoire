@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import LoadingPage from "./LoadingPage";
-import { getSongs, pushSong, Song, Songs } from "../data/song";
+import { getSongs, pushSong, Song, SongEntries } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
@@ -14,7 +14,7 @@ const MyPageContent: React.FC<{
   user: User;
 }> = ({ user }) => {
   const userId = user.userId;
-  const [data, setData] = useState<undefined | Songs>(undefined);
+  const [data, setData] = useState<undefined | SongEntries>(undefined);
 
   useEffect(() => {
     getSongs(userId)

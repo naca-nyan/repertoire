@@ -20,7 +20,7 @@ export interface Song {
   createdAt?: number;
 }
 
-export type Songs = [string, Song][];
+export type SongEntries = [songId: string, song: Song][];
 
 export function isSong(x: any): x is Song {
   return (
@@ -49,26 +49,26 @@ function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
   });
 }
 
-function snapshotToSongs(snapshot: DataSnapshot): Songs {
-  const songs: Songs = [];
+function snapshotToSongs(snapshot: DataSnapshot): SongEntries {
+  const songEntries: SongEntries = [];
   snapshot.forEach((child) => {
     const songId = child.key;
     const song = child.val();
     if (songId === null) throw new Error("Invalid ID: songId is null");
     if (!isSong(song))
       throw new Error("Type validation failed: a value of child is not song");
-    songs.push([songId, song]);
+    songEntries.push([songId, song]);
   });
-  return songs;
+  return songEntries;
 }
 
-async function getAllSongs(): Promise<Songs> {
+async function getAllSongs(): Promise<SongEntries> {
   const snapshot = await getValueOnce(`${root}/songs/`, "createdAt");
   const songs = snapshotToSongs(snapshot);
   return songs;
 }
 
-export async function getSongsOfUser(userId: string): Promise<Songs> {
+export async function getSongsOfUser(userId: string): Promise<SongEntries> {
   const snapshot = await getValueOnce(
     `${root}/users/${userId}/songs/`,
     "createdAt"
@@ -77,7 +77,7 @@ export async function getSongsOfUser(userId: string): Promise<Songs> {
   return songs;
 }
 
-export async function getSongs(userId?: string): Promise<Songs> {
+export async function getSongs(userId?: string): Promise<SongEntries> {
   if (userId === undefined) return await getAllSongs();
   if (userId === "") throw new Error("invalid username");
   return await getSongsOfUser(userId);
@@ -126,7 +126,9 @@ function getValueQueryOnce(
   });
 }
 
-export async function getSongsByScreenName(screenName: string): Promise<Songs> {
+export async function getSongsByScreenName(
+  screenName: string
+): Promise<SongEntries> {
   const lowerScreenName = screenName.toLocaleLowerCase();
   const snapshot = await getValueQueryOnce(
     `${root}/users`,

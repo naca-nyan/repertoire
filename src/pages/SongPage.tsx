@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
 
-import { getSongsByScreenName, Songs } from "../data/song";
+import { getSongsByScreenName, SongEntries } from "../data/song";
 import SongList from "../components/SongList";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
@@ -45,9 +45,9 @@ const SongListSubHeader: React.FC<{
   );
 };
 
-function filterSongs(songs: Songs, filter: string): Songs {
+function filterSongs(songEntries: SongEntries, filter: string): SongEntries {
   const filterLowerCase = filter.toLowerCase();
-  const filteredEntries = songs.filter((songEntry) => {
+  const filteredEntries = songEntries.filter((songEntry) => {
     const [, { title, artist }] = songEntry;
     const titleLowerCase = title.toLowerCase();
     const artistLowerCase = artist.toLowerCase();
@@ -60,7 +60,7 @@ function filterSongs(songs: Songs, filter: string): Songs {
 }
 
 const SongPageContent: React.FC<{
-  data: Songs;
+  data: SongEntries;
 }> = ({ data }) => {
   const [searchWord, setSearchWord] = useState("");
   const [debouncedSearchWord, setDebouncedSearchWord] = useState("");
@@ -84,7 +84,7 @@ const SongPageContent: React.FC<{
 
 const SongPage: React.FC = () => {
   const { screenName } = useParams();
-  const [data, setData] = useState<undefined | null | Songs>(undefined);
+  const [data, setData] = useState<undefined | null | SongEntries>(undefined);
 
   useEffect(() => {
     if (!screenName) {

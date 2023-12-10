@@ -17,7 +17,13 @@ import {
   ExpandMore,
   OpenInNew,
 } from "@mui/icons-material";
-import { onSongExists, removeSong, setSong, Song, Songs } from "../data/song";
+import {
+  onSongExists,
+  removeSong,
+  setSong,
+  Song,
+  SongEntries,
+} from "../data/song";
 import { UserStateContext } from "../contexts/user";
 import { siteNameOf, toURL } from "./utils";
 
@@ -64,7 +70,7 @@ const BookmarkButton: React.FC<{
   );
 };
 
-const SongItem: React.FC<{ songEntry: Songs[number] }> = ({
+const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
   songEntry: [songId, song],
 }) => (
   <ListItem
@@ -97,10 +103,10 @@ const SongItem: React.FC<{ songEntry: Songs[number] }> = ({
 
 const SongListOfArtist: React.FC<{
   artist: string;
-  songs: Songs;
+  songEntries: SongEntries;
   open?: boolean;
 }> = (props) => {
-  const { artist, songs } = props;
+  const { artist, songEntries } = props;
   useEffect(() => setOpen(props.open ?? true), [props.open]);
   const [open, setOpen] = useState(props.open ?? true);
   return (
@@ -113,7 +119,7 @@ const SongListOfArtist: React.FC<{
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        {songs.map(([songId, song]) => (
+        {songEntries.map(([songId, song]) => (
           <SongItem songEntry={[songId, song]} key={songId} />
         ))}
       </Collapse>
@@ -121,9 +127,9 @@ const SongListOfArtist: React.FC<{
   );
 };
 
-function uniqByArtist(songs: Songs): { [artist: string]: Songs } {
-  const artists: { [artist: string]: Songs } = {};
-  for (const [songId, song] of songs) {
+function uniqByArtist(songEntries: SongEntries): Record<string, SongEntries> {
+  const artists: Record<string, SongEntries> = {};
+  for (const [songId, song] of songEntries) {
     const songsOfTheArtist = artists[song.artist] ?? [];
     artists[song.artist] = [...songsOfTheArtist, [songId, song]];
   }
@@ -131,7 +137,7 @@ function uniqByArtist(songs: Songs): { [artist: string]: Songs } {
 }
 
 const SongList: React.FC<{
-  data: Songs;
+  data: SongEntries;
   collapsed: boolean;
   subheader?: React.ReactNode;
 }> = ({ data, collapsed, subheader }) => {
@@ -142,7 +148,7 @@ const SongList: React.FC<{
         <SongListOfArtist
           key={artist}
           artist={artist}
-          songs={songs}
+          songEntries={songs}
           open={!collapsed}
         />
       ))}
