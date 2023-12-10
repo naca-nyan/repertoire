@@ -1,12 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Box,
-  IconButton,
-  List,
-  Paper,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import LoadingPage from "./LoadingPage";
 import { getSongs, pushSong, Song, Songs } from "../data/song";
@@ -61,9 +54,7 @@ const MyPageContent: React.FC<{
         </Typography>
       </Box>
       <Paper elevation={3} sx={{ mt: 2 }}>
-        <List component="nav" dense>
-          <SongList data={data} collapsed={false} />
-        </List>
+        <SongList data={data} collapsed={false} />
       </Paper>
       <SongSubmitForm onAddSong={onAddSong} />
     </Container>

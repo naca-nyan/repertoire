@@ -12,7 +12,6 @@ import {
   Container,
   Divider,
   Input,
-  List,
   ListSubheader,
   Paper,
   Toolbar,
@@ -78,9 +77,7 @@ const SongPageContent: React.FC<{
   const filtered = filter ? filterSongs(data, filter) : data;
   return (
     <Paper elevation={3} sx={{ mt: 2 }}>
-      <List component="nav" dense subheader={subheader}>
-        <SongList data={filtered} collapsed={collapsed} />
-      </List>
+      <SongList data={filtered} collapsed={collapsed} subheader={subheader} />
     </Paper>
   );
 };

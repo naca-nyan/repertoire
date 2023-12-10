@@ -64,40 +64,35 @@ const BookmarkButton: React.FC<{
   );
 };
 
-const ListSongs: React.FC<{ songs: Songs }> = ({ songs }) => (
-  <List component="div" disablePadding dense>
-    {songs.map(([songId, song]) => (
-      <ListItem
-        disablePadding
-        key={songId}
-        secondaryAction={
-          <BookmarkButton
-            songId={songId}
-            song={{ title: song.title, artist: song.artist }}
-          />
-        }
+const SongItem: React.FC<{ songEntry: Songs[number] }> = ({
+  songEntry: [songId, song],
+}) => (
+  <ListItem
+    disablePadding
+    secondaryAction={
+      <BookmarkButton
+        songId={songId}
+        song={{ title: song.title, artist: song.artist }}
+      />
+    }
+  >
+    <Tooltip arrow title={siteNameOf(songId)} placement="bottom-start">
+      <ListItemButton
+        component="a"
+        href={toURL(songId, song).href}
+        target="_blank"
+        rel="noopener"
       >
-        <Tooltip arrow title={siteNameOf(songId)} placement="bottom-start">
-          <ListItemButton
-            component="a"
-            href={toURL(songId, song).href}
-            target="_blank"
-            rel="noopener"
-          >
-            <ListItemText>
-              <Link component="span">{song.title}</Link>
-              <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
-              <Typography
-                sx={{ float: "right", color: "#999", fontSize: "1em" }}
-              >
-                {song.comment}
-              </Typography>
-            </ListItemText>
-          </ListItemButton>
-        </Tooltip>
-      </ListItem>
-    ))}
-  </List>
+        <ListItemText>
+          <Link component="span">{song.title}</Link>
+          <OpenInNew color="disabled" sx={{ height: "12px", p: 0 }} />
+          <Typography sx={{ float: "right", color: "#999", fontSize: "1em" }}>
+            {song.comment}
+          </Typography>
+        </ListItemText>
+      </ListItemButton>
+    </Tooltip>
+  </ListItem>
 );
 
 const SongListOfArtist: React.FC<{
@@ -109,7 +104,7 @@ const SongListOfArtist: React.FC<{
   useEffect(() => setOpen(props.open ?? true), [props.open]);
   const [open, setOpen] = useState(props.open ?? true);
   return (
-    <>
+    <List disablePadding dense>
       <ListItemButton onClick={() => setOpen(!open)}>
         <ListItemText
           primary={artist}
@@ -118,9 +113,11 @@ const SongListOfArtist: React.FC<{
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <ListSongs songs={songs} />
+        {songs.map(([songId, song]) => (
+          <SongItem songEntry={[songId, song]} key={songId} />
+        ))}
       </Collapse>
-    </>
+    </List>
   );
 };
 
@@ -136,10 +133,11 @@ function uniqByArtist(songs: Songs): { [artist: string]: Songs } {
 const SongList: React.FC<{
   data: Songs;
   collapsed: boolean;
-}> = React.memo(({ data, collapsed }) => {
+  subheader?: React.ReactNode;
+}> = ({ data, collapsed, subheader }) => {
   const uniq = uniqByArtist(data);
   return (
-    <>
+    <List dense subheader={subheader}>
       {Object.entries(uniq).map(([artist, songs]) => (
         <SongListOfArtist
           key={artist}
@@ -148,8 +146,8 @@ const SongList: React.FC<{
           open={!collapsed}
         />
       ))}
-    </>
+    </List>
   );
-});
+};
 
-export default SongList;
+export default React.memo(SongList);
