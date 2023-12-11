@@ -1,13 +1,7 @@
-import React, {
-  MouseEventHandler,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Collapse,
-  IconButton,
   Link,
   List,
   ListItem,
@@ -17,78 +11,18 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import StarIcon from "@mui/icons-material/Star";
-import {
-  onSongExists,
-  removeSong,
-  setSong,
-  Song,
-  SongEntries,
-} from "../data/song";
-import { UserStateContext } from "../contexts/user";
+import { SongEntries } from "../data/song";
 import { siteKind, siteNames, toURL } from "./utils";
 import { Theme } from "@mui/material";
 import SiteIcon from "./SiteIcon";
-
-const Star: React.FC<{
-  title: string;
-  stard?: boolean;
-  onClick?: MouseEventHandler<HTMLButtonElement>;
-}> = ({ stard, title, onClick }) => (
-  <Tooltip title={title}>
-    <IconButton edge="end" onClick={onClick}>
-      <StarIcon
-        fontSize="small"
-        sx={{ color: stard ? "#f59e0b" : undefined }}
-      />
-    </IconButton>
-  </Tooltip>
-);
-
-const StarButton: React.FC<{
-  songId: string;
-  song: Song;
-}> = ({ songId, song }) => {
-  const us = useContext(UserStateContext);
-  const userId = us.state === "signed in" ? us.user.userId : null;
-  const [bookmarked, setBookmarked] = useState(false);
-  useEffect(() => {
-    if (!userId) return;
-    onSongExists(userId, songId, setBookmarked);
-  }, [userId, songId]);
-
-  if (userId === null)
-    return <Star title="知ってる曲を登録するにはログイン！" />;
-  if (bookmarked) {
-    return (
-      <Star
-        stard
-        title="知ってる曲から削除する"
-        onClick={() => removeSong(userId, songId)}
-      />
-    );
-  }
-  return (
-    <Star
-      title="知ってる曲に登録する！"
-      onClick={() =>
-        setSong(userId, songId, { ...song, createdAt: Date.now() })
-      }
-    />
-  );
-};
+import StarButton from "./StarButton";
 
 const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
   songEntry: [songId, song],
 }) => (
   <ListItem
     disablePadding
-    secondaryAction={
-      <StarButton
-        songId={songId}
-        song={{ title: song.title, artist: song.artist }}
-      />
-    }
+    secondaryAction={<StarButton songEntry={[songId, song]} />}
   >
     <Tooltip arrow title={siteNames[siteKind(songId)]} placement="left">
       <ListItemButton
