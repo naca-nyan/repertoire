@@ -4,11 +4,11 @@ import { Container } from "@mui/system";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import LoadingPage from "./LoadingPage";
 import { getSongs, pushSong, Song, SongEntries } from "../data/song";
-import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { User } from "../data/user";
+import SongDataGrid from "../components/SongDataGrid";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -69,14 +69,14 @@ const MyPageContent: React.FC<{
   const artists = data.map(([_, song]) => song.artist);
   const artistsUniq = [...new Set(artists)];
   return (
-    <Container maxWidth="xl" sx={{ mt: 3 }}>
-      <Stack direction="row" spacing={1}>
+    <Container maxWidth="lg" sx={{ mt: 3 }}>
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
         <Typography variant="h5">
           {user.displayName}の知ってる曲リスト
         </Typography>
         <ShareButton url={shareURL} />
       </Stack>
-      <SongList data={data} collapsed={false} />
+      <SongDataGrid data={data} />
       <SongSubmitForm artists={artistsUniq} onAddSong={onAddSong} />
     </Container>
   );
