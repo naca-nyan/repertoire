@@ -1,6 +1,14 @@
 import React, { ChangeEventHandler, useState } from "react";
 import { Add, Close } from "@mui/icons-material";
-import { Button, Fab, Fade, IconButton, Modal, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Button,
+  Fab,
+  Fade,
+  IconButton,
+  Modal,
+  TextField,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { Song } from "../data/song";
 import { fromURL } from "./utils";
@@ -24,10 +32,11 @@ const textfieldStyle = {
 };
 
 interface Props {
+  artists: string[];
   onAddSong: (songId: string, song: Song) => void;
 }
 
-const SongSubmitForm: React.FC<Props> = (props) => {
+const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
   const [open, setOpen] = useState(false);
 
   const [url, setURL] = useState("");
@@ -59,9 +68,7 @@ const SongSubmitForm: React.FC<Props> = (props) => {
       if (songId.startsWith("chordwiki:"))
         setTitle(songId.replace("chordwiki:", ""));
     } catch (e) {
-      if (e instanceof Error) {
-        setHelperText(e.message);
-      }
+      setHelperText(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -71,30 +78,36 @@ const SongSubmitForm: React.FC<Props> = (props) => {
     if (id === "url") {
       setURL(value);
       setTitleFromUrl(value);
-      return;
     }
     if (id === "title") setTitle(value);
     if (id === "artist") setArtist(value);
-    if (helperText) validate();
+    if (validate() === true) setHelperText("");
   };
 
-  function validate(): boolean {
-    if (!title || !artist || !url) {
-      setHelperText("必須の項目をすべて入力してください");
-      return false;
+  function validate(): true | string {
+    try {
+      fromURL(new URL(url));
+    } catch (e) {
+      return e instanceof Error ? e.message : String(e);
     }
-    setHelperText("");
+    if (!url || !title || !artist) {
+      return "必須の項目をすべて入力してください";
+    }
     return true;
   }
 
   const handleClickAdd = () => {
-    if (!validate()) return;
+    const validateResult = validate();
+    if (validateResult !== true) {
+      setHelperText(validateResult);
+      return;
+    }
     try {
       const { songId, key, symbol } = fromURL(new URL(url));
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
-      props.onAddSong(songId, song);
+      onAddSong(songId, song);
       clearAndClose();
     } catch (e) {
       if (e instanceof Error) {
@@ -153,12 +166,19 @@ const SongSubmitForm: React.FC<Props> = (props) => {
               onChange={handleOnChange}
               sx={textfieldStyle}
             />
-            <TextField
+            <Autocomplete
               id="artist"
-              label="アーティスト名"
-              error={Boolean(helperText)}
-              onChange={handleOnChange}
-              sx={textfieldStyle}
+              freeSolo
+              options={artists}
+              onChange={(_, value) => setArtist(value ?? "")}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="アーティスト名"
+                  error={Boolean(helperText)}
+                  sx={textfieldStyle}
+                />
+              )}
             />
             <Button
               variant="contained"
