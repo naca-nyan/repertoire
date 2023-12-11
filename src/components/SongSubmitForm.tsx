@@ -68,9 +68,7 @@ const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
       if (songId.startsWith("chordwiki:"))
         setTitle(songId.replace("chordwiki:", ""));
     } catch (e) {
-      if (e instanceof Error) {
-        setHelperText(e.message);
-      }
+      setHelperText(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -80,24 +78,30 @@ const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
     if (id === "url") {
       setURL(value);
       setTitleFromUrl(value);
-      return;
     }
     if (id === "title") setTitle(value);
     if (id === "artist") setArtist(value);
-    if (helperText) validate();
+    if (validate() === true) setHelperText("");
   };
 
-  function validate(): boolean {
-    if (!title || !artist || !url) {
-      setHelperText("必須の項目をすべて入力してください");
-      return false;
+  function validate(): true | string {
+    try {
+      fromURL(new URL(url));
+    } catch (e) {
+      return e instanceof Error ? e.message : String(e);
     }
-    setHelperText("");
+    if (!url || !title || !artist) {
+      return "必須の項目をすべて入力してください";
+    }
     return true;
   }
 
   const handleClickAdd = () => {
-    if (!validate()) return;
+    const validateResult = validate();
+    if (validateResult !== true) {
+      setHelperText(validateResult);
+      return;
+    }
     try {
       const { songId, key, symbol } = fromURL(new URL(url));
       const song: Song = { artist, title };
@@ -166,7 +170,7 @@ const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
               id="artist"
               freeSolo
               options={artists}
-              onChange={handleOnChange}
+              onChange={(_, value) => setArtist(value ?? "")}
               renderInput={(params) => (
                 <TextField
                   {...params}
