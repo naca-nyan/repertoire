@@ -66,6 +66,8 @@ const MyPageContent: React.FC<{
   };
 
   const shareURL = window.location.origin + "/users/" + user.screenName;
+  const artists = data.map(([_, song]) => song.artist);
+  const artistsUniq = [...new Set(artists)];
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
       <Stack direction="row" spacing={1}>
@@ -75,7 +77,7 @@ const MyPageContent: React.FC<{
         <ShareButton url={shareURL} />
       </Stack>
       <SongList data={data} collapsed={false} />
-      <SongSubmitForm onAddSong={onAddSong} />
+      <SongSubmitForm artists={artistsUniq} onAddSong={onAddSong} />
     </Container>
   );
 };

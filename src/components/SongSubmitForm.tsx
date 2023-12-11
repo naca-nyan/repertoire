@@ -1,6 +1,14 @@
 import React, { ChangeEventHandler, useState } from "react";
 import { Add, Close } from "@mui/icons-material";
-import { Button, Fab, Fade, IconButton, Modal, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Button,
+  Fab,
+  Fade,
+  IconButton,
+  Modal,
+  TextField,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { Song } from "../data/song";
 import { fromURL } from "./utils";
@@ -24,10 +32,11 @@ const textfieldStyle = {
 };
 
 interface Props {
+  artists: string[];
   onAddSong: (songId: string, song: Song) => void;
 }
 
-const SongSubmitForm: React.FC<Props> = (props) => {
+const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
   const [open, setOpen] = useState(false);
 
   const [url, setURL] = useState("");
@@ -94,7 +103,7 @@ const SongSubmitForm: React.FC<Props> = (props) => {
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
-      props.onAddSong(songId, song);
+      onAddSong(songId, song);
       clearAndClose();
     } catch (e) {
       if (e instanceof Error) {
@@ -153,12 +162,19 @@ const SongSubmitForm: React.FC<Props> = (props) => {
               onChange={handleOnChange}
               sx={textfieldStyle}
             />
-            <TextField
+            <Autocomplete
               id="artist"
-              label="アーティスト名"
-              error={Boolean(helperText)}
+              freeSolo
+              options={artists}
               onChange={handleOnChange}
-              sx={textfieldStyle}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="アーティスト名"
+                  error={Boolean(helperText)}
+                  sx={textfieldStyle}
+                />
+              )}
             />
             <Button
               variant="contained"
