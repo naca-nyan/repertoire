@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AppContainer from "./components/AppContainer";
 import TopPage from "./pages/TopPage";
-import SongPage from "./pages/SongPage";
+import UserPage from "./pages/UserPage";
 import MyPage from "./pages/MyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { defaultUserState, UserState, UserStateContext } from "./contexts/user";
@@ -47,7 +47,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<AppContainer />}>
             <Route path="" element={<TopPage />} />
-            <Route path="users/:screenName" element={<SongPage />} />
+            <Route path="users/:screenName" element={<UserPage />} />
             <Route path="mypage" element={<MyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
