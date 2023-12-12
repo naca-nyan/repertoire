@@ -1,13 +1,7 @@
-import React, {
-  MouseEventHandler,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Collapse,
-  IconButton,
   Link,
   List,
   ListItem,
@@ -17,79 +11,16 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import StarIcon from "@mui/icons-material/Star";
-import {
-  onSongExists,
-  removeSong,
-  setSong,
-  Song,
-  SongEntries,
-} from "../data/song";
-import { UserStateContext } from "../contexts/user";
+import { SongEntry } from "../data/song";
 import { siteKind, siteNames, toURL } from "./utils";
 import { Theme } from "@mui/material";
 import SiteIcon from "./SiteIcon";
 
-const Star: React.FC<{
-  title: string;
-  stard?: boolean;
-  onClick?: MouseEventHandler<HTMLButtonElement>;
-}> = ({ stard, title, onClick }) => (
-  <Tooltip title={title}>
-    <IconButton edge="end" onClick={onClick}>
-      <StarIcon
-        fontSize="small"
-        sx={{ color: stard ? "#f59e0b" : undefined }}
-      />
-    </IconButton>
-  </Tooltip>
-);
-
-const StarButton: React.FC<{
-  songId: string;
-  song: Song;
-}> = ({ songId, song }) => {
-  const us = useContext(UserStateContext);
-  const userId = us.state === "signed in" ? us.user.userId : null;
-  const [bookmarked, setBookmarked] = useState(false);
-  useEffect(() => {
-    if (!userId) return;
-    onSongExists(userId, songId, setBookmarked);
-  }, [userId, songId]);
-
-  if (userId === null)
-    return <Star title="知ってる曲を登録するにはログイン！" />;
-  if (bookmarked) {
-    return (
-      <Star
-        stard
-        title="知ってる曲から削除する"
-        onClick={() => removeSong(userId, songId)}
-      />
-    );
-  }
-  return (
-    <Star
-      title="知ってる曲に登録する！"
-      onClick={() =>
-        setSong(userId, songId, { ...song, createdAt: Date.now() })
-      }
-    />
-  );
-};
-
-const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
-  songEntry: [songId, song],
-}) => (
-  <ListItem
-    disablePadding
-    secondaryAction={
-      <StarButton
-        songId={songId}
-        song={{ title: song.title, artist: song.artist }}
-      />
-    }
-  >
+const SongItem: React.FC<{
+  songEntry: SongEntry;
+  actionNode: React.ReactNode;
+}> = ({ songEntry: [songId, song], actionNode }) => (
+  <ListItem disablePadding secondaryAction={actionNode}>
     <Tooltip arrow title={siteNames[siteKind(songId)]} placement="left">
       <ListItemButton
         component="a"
@@ -111,12 +42,12 @@ const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
 
 const SongListOfArtist: React.FC<{
   artist: string;
-  songEntries: SongEntries;
+  songEntries: SongEntry[];
   open?: boolean;
-}> = (props) => {
-  const { artist, songEntries } = props;
-  useEffect(() => setOpen(props.open ?? true), [props.open]);
-  const [open, setOpen] = useState(props.open ?? true);
+  songAction: React.FC<{ songEntry: SongEntry }>;
+}> = ({ artist, songEntries, open: openInitial, songAction }) => {
+  useEffect(() => setOpen(openInitial ?? true), [openInitial]);
+  const [open, setOpen] = useState(openInitial ?? true);
   return (
     <Card sx={{ marginBottom: 2 }}>
       <ListItemButton
@@ -130,16 +61,20 @@ const SongListOfArtist: React.FC<{
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        {songEntries.map(([songId, song]) => (
-          <SongItem songEntry={[songId, song]} key={songId} />
+        {songEntries.map((songEntry) => (
+          <SongItem
+            key={songEntry[0]}
+            songEntry={songEntry}
+            actionNode={songAction({ songEntry })}
+          />
         ))}
       </Collapse>
     </Card>
   );
 };
 
-function uniqByArtist(songEntries: SongEntries): Record<string, SongEntries> {
-  const artists: Record<string, SongEntries> = {};
+function uniqByArtist(songEntries: SongEntry[]): Record<string, SongEntry[]> {
+  const artists: Record<string, SongEntry[]> = {};
   for (const [songId, song] of songEntries) {
     const songsOfTheArtist = artists[song.artist] ?? [];
     artists[song.artist] = [...songsOfTheArtist, [songId, song]];
@@ -148,9 +83,10 @@ function uniqByArtist(songEntries: SongEntries): Record<string, SongEntries> {
 }
 
 const SongList: React.FC<{
-  data: SongEntries;
+  data: SongEntry[];
   collapsed: boolean;
-}> = ({ data, collapsed }) => {
+  songAction: React.FC<{ songEntry: SongEntry }>;
+}> = ({ data, collapsed, songAction }) => {
   const uniq = uniqByArtist(data);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
@@ -166,6 +102,7 @@ const SongList: React.FC<{
           artist={artist}
           songEntries={songs}
           open={!collapsed}
+          songAction={songAction}
         />
       ))}
     </List>

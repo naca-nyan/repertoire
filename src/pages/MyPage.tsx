@@ -1,14 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Fab,
+  Snackbar,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Container } from "@mui/system";
 import IosShareIcon from "@mui/icons-material/IosShare";
+import AddIcon from "@mui/icons-material/Add";
+
 import LoadingPage from "./LoadingPage";
-import { getSongs, pushSong, Song, SongEntries } from "../data/song";
+import { watchSongs, Song, SongEntry, setSong } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { User } from "../data/user";
+import EditButton from "../components/EditButton";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -20,15 +31,16 @@ const ShareButton: React.FC<{ url: string }> = ({ url }) => {
     <Tooltip title="共有リンクをコピー">
       <Button
         onClick={copyShareURL}
+        startIcon={<IosShareIcon />}
         color="inherit"
         sx={{
+          px: "11px",
           backgroundColor: "#f2f2f2",
           "&:hover": { backgroundColor: "#e5e5e5" },
           borderRadius: "20px",
         }}
       >
-        <IosShareIcon />
-        <Typography sx={{ ml: "4px" }}>共有</Typography>
+        <Typography>共有</Typography>
         <Snackbar
           open={notifyOpen}
           autoHideDuration={3000}
@@ -40,29 +52,51 @@ const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
+const MainButton: React.FC<{
+  icon: React.ReactNode;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+}> = ({ icon, onClick }) => (
+  <>
+    <Box
+      sx={{
+        // button height + bottom height
+        height: 56 + 24,
+      }}
+    />
+    <Box
+      sx={{
+        maxWidth: "xl",
+        width: "100%",
+        position: "fixed",
+        bottom: 24,
+        textAlign: "end",
+        right: { xs: 24, sm: "auto" },
+      }}
+    >
+      <Fab onClick={onClick} color="primary" sx={{ right: { xs: 0, sm: 24 } }}>
+        {icon}
+      </Fab>
+    </Box>
+  </>
+);
+
 const MyPageContent: React.FC<{
   user: User;
 }> = ({ user }) => {
   const userId = user.userId;
-  const [data, setData] = useState<undefined | SongEntries>(undefined);
+  const [data, setData] = useState<undefined | SongEntry[]>(undefined);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
-    getSongs(userId)
-      .then((songs) => setData(songs))
-      .catch(() => {
-        console.warn("Failed to fetch songs; fallback to []");
-        setData([]);
-      });
+    watchSongs(userId, (songs) => setData(songs));
   }, [userId]);
 
   if (data === undefined) {
     return <LoadingPage />;
   }
 
-  const onAddSong = (songId: string, song: Song) => {
-    pushSong(userId, songId, { ...song, createdAt: Date.now() })
-      .then((songId) => setData([...data, [songId, song]]))
-      .catch((e) => console.error("cannot push song", song, e));
+  const onSubmitSong = (songId: string, song: Song) => {
+    setSong(userId, songId, { ...song, createdAt: Date.now() });
   };
 
   const shareURL = window.location.origin + "/users/" + user.screenName;
@@ -76,8 +110,14 @@ const MyPageContent: React.FC<{
         </Typography>
         <ShareButton url={shareURL} />
       </Stack>
-      <SongList data={data} collapsed={false} />
-      <SongSubmitForm artists={artistsUniq} onAddSong={onAddSong} />
+      <SongList data={data} collapsed={false} songAction={EditButton} />
+      <SongSubmitForm
+        open={formOpen}
+        artists={artistsUniq}
+        onSubmit={onSubmitSong}
+        onClose={() => setFormOpen(false)}
+      />
+      <MainButton icon={<AddIcon />} onClick={() => setFormOpen(true)} />
     </Container>
   );
 };

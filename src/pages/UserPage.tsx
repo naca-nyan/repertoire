@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
-import { getSongsByScreenName, SongEntries } from "../data/song";
+import { watchSongsByScreenName, SongEntry } from "../data/song";
 import SongList from "../components/SongList";
 import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
+import StarButton from "../components/StarButton";
 
-function filterSongs(songEntries: SongEntries, filter: string): SongEntries {
+function filterSongs(songEntries: SongEntry[], filter: string): SongEntry[] {
   const filterLowerCase = filter.toLowerCase();
   const filteredEntries = songEntries.filter((songEntry) => {
     const [, { title, artist }] = songEntry;
@@ -24,7 +25,7 @@ function filterSongs(songEntries: SongEntries, filter: string): SongEntries {
 
 const SongPageContent: React.FC<{
   screenName: string;
-  data: SongEntries;
+  data: SongEntry[];
 }> = ({ screenName, data }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [filter, setFilter] = useState("");
@@ -45,26 +46,26 @@ const SongPageContent: React.FC<{
       <Box sx={{ marginTop: 1, marginBottom: 2 }}>
         <SearchBar onInput={(v) => setFilter(v)} />
       </Box>
-      <SongList data={filtered} collapsed={collapsed} />
+      <SongList data={filtered} collapsed={collapsed} songAction={StarButton} />
     </>
   );
 };
 
 const SongPage: React.FC = () => {
   const { screenName } = useParams();
-  const [data, setData] = useState<undefined | null | SongEntries>(undefined);
+  const [data, setData] = useState<undefined | null | SongEntry[]>(undefined);
 
   useEffect(() => {
     if (!screenName) {
       setData(null);
       return;
     }
-    getSongsByScreenName(screenName)
-      .then(setData)
-      .catch((e) => {
-        console.warn(e);
-        setData(null);
-      });
+    try {
+      watchSongsByScreenName(screenName, setData);
+    } catch (e) {
+      console.warn(e);
+      setData(null);
+    }
   }, [screenName]);
 
   if (!screenName) return <NotFoundPage />;
