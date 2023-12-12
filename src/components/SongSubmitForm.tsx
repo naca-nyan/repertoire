@@ -1,5 +1,5 @@
 import React, { ChangeEventHandler, useEffect, useState } from "react";
-import { Close } from "@mui/icons-material";
+import { Add, Close, Delete, Done } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
@@ -36,6 +36,7 @@ interface Props {
   artists: string[];
   onSubmit: (songId: string, song: Song) => void;
   onClose: () => void;
+  onDelete?: (songId: string) => void;
 }
 
 const SongSubmitForm: React.FC<Props> = ({
@@ -44,6 +45,7 @@ const SongSubmitForm: React.FC<Props> = ({
   artists,
   onSubmit,
   onClose,
+  onDelete,
 }) => {
   const [url, setURL] = useState("");
   const [title, setTitle] = useState("");
@@ -135,6 +137,12 @@ const SongSubmitForm: React.FC<Props> = ({
       }
     }
   };
+  const handleClickDelete = () => {
+    if (formData && onDelete) {
+      const [songId] = formData;
+      if (songId) onDelete(songId);
+    }
+  };
 
   return (
     <Modal open={open} onClose={handleModalClose}>
@@ -178,12 +186,24 @@ const SongSubmitForm: React.FC<Props> = ({
               />
             )}
           />
+          {onDelete && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<Delete />}
+              onClick={handleClickDelete}
+              sx={{ float: "left", mb: 2 }}
+            >
+              削除
+            </Button>
+          )}
           <Button
             variant="contained"
+            startIcon={formData ? <Done /> : <Add />}
             onClick={handleClickAdd}
             sx={{ float: "right", mb: 2 }}
           >
-            Add
+            {formData ? "更新" : "知ってる曲に追加"}
           </Button>
         </Box>
       </Fade>

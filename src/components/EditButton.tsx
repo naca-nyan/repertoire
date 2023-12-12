@@ -31,6 +31,9 @@ const EditButton: React.FC<{ songEntry: SongEntry }> = ({
     if (songId !== songIdNew) await removeSong(userId, songId);
     await setSong(userId, songId, songNew);
   };
+  const onDelete = async (songId: string) => {
+    await removeSong(userId, songId);
+  };
 
   return (
     <>
@@ -41,6 +44,7 @@ const EditButton: React.FC<{ songEntry: SongEntry }> = ({
         artists={[song.artist]}
         onSubmit={onUpdate}
         onClose={() => setFormOpen(false)}
+        onDelete={onDelete}
       />
     </>
   );
