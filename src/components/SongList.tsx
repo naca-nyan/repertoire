@@ -11,13 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { SongEntries } from "../data/song";
+import { SongEntry } from "../data/song";
 import { siteKind, siteNames, toURL } from "./utils";
 import { Theme } from "@mui/material";
 import SiteIcon from "./SiteIcon";
 import StarButton from "./StarButton";
 
-const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
+const SongItem: React.FC<{ songEntry: SongEntry }> = ({
   songEntry: [songId, song],
 }) => (
   <ListItem
@@ -45,7 +45,7 @@ const SongItem: React.FC<{ songEntry: SongEntries[number] }> = ({
 
 const SongListOfArtist: React.FC<{
   artist: string;
-  songEntries: SongEntries;
+  songEntries: SongEntry[];
   open?: boolean;
 }> = (props) => {
   const { artist, songEntries } = props;
@@ -72,8 +72,8 @@ const SongListOfArtist: React.FC<{
   );
 };
 
-function uniqByArtist(songEntries: SongEntries): Record<string, SongEntries> {
-  const artists: Record<string, SongEntries> = {};
+function uniqByArtist(songEntries: SongEntry[]): Record<string, SongEntry[]> {
+  const artists: Record<string, SongEntry[]> = {};
   for (const [songId, song] of songEntries) {
     const songsOfTheArtist = artists[song.artist] ?? [];
     artists[song.artist] = [...songsOfTheArtist, [songId, song]];
@@ -82,7 +82,7 @@ function uniqByArtist(songEntries: SongEntries): Record<string, SongEntries> {
 }
 
 const SongList: React.FC<{
-  data: SongEntries;
+  data: SongEntry[];
   collapsed: boolean;
 }> = ({ data, collapsed }) => {
   const uniq = uniqByArtist(data);

@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
-import { onSongExists, removeSong, setSong, SongEntries } from "../data/song";
+import { onSongExists, removeSong, setSong, SongEntry } from "../data/song";
 import { UserStateContext } from "../contexts/user";
 
 const Star: React.FC<{
@@ -24,7 +24,7 @@ const Star: React.FC<{
   </Tooltip>
 );
 
-const StarButton: React.FC<{ songEntry: SongEntries[number] }> = ({
+const StarButton: React.FC<{ songEntry: SongEntry }> = ({
   songEntry: [songId, song],
 }) => {
   const us = useContext(UserStateContext);

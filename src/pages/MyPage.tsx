@@ -3,7 +3,7 @@ import { Button, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import LoadingPage from "./LoadingPage";
-import { getSongs, pushSong, Song, SongEntries } from "../data/song";
+import { getSongs, pushSong, Song, SongEntry } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
@@ -44,7 +44,7 @@ const MyPageContent: React.FC<{
   user: User;
 }> = ({ user }) => {
   const userId = user.userId;
-  const [data, setData] = useState<undefined | SongEntries>(undefined);
+  const [data, setData] = useState<undefined | SongEntry[]>(undefined);
 
   useEffect(() => {
     getSongs(userId)

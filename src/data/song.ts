@@ -20,7 +20,7 @@ export interface Song {
   createdAt?: number;
 }
 
-export type SongEntries = [songId: string, song: Song][];
+export type SongEntry = [songId: string, song: Song];
 
 export function isSong(x: any): x is Song {
   return (
@@ -49,8 +49,8 @@ function getValueOnce(path: string, orderBy: string): Promise<DataSnapshot> {
   });
 }
 
-function snapshotToSongs(snapshot: DataSnapshot): SongEntries {
-  const songEntries: SongEntries = [];
+function snapshotToSongs(snapshot: DataSnapshot): SongEntry[] {
+  const songEntries: SongEntry[] = [];
   snapshot.forEach((child) => {
     const songId = child.key;
     const song = child.val();
@@ -62,13 +62,13 @@ function snapshotToSongs(snapshot: DataSnapshot): SongEntries {
   return songEntries;
 }
 
-async function getAllSongs(): Promise<SongEntries> {
+async function getAllSongs(): Promise<SongEntry[]> {
   const snapshot = await getValueOnce(`${root}/songs/`, "createdAt");
   const songs = snapshotToSongs(snapshot);
   return songs;
 }
 
-export async function getSongsOfUser(userId: string): Promise<SongEntries> {
+export async function getSongsOfUser(userId: string): Promise<SongEntry[]> {
   const snapshot = await getValueOnce(
     `${root}/users/${userId}/songs/`,
     "createdAt"
@@ -77,7 +77,7 @@ export async function getSongsOfUser(userId: string): Promise<SongEntries> {
   return songs;
 }
 
-export async function getSongs(userId?: string): Promise<SongEntries> {
+export async function getSongs(userId?: string): Promise<SongEntry[]> {
   if (userId === undefined) return await getAllSongs();
   if (userId === "") throw new Error("invalid username");
   return await getSongsOfUser(userId);
@@ -128,7 +128,7 @@ function getValueQueryOnce(
 
 export async function getSongsByScreenName(
   screenName: string
-): Promise<SongEntries> {
+): Promise<SongEntry[]> {
   const lowerScreenName = screenName.toLocaleLowerCase();
   const snapshot = await getValueQueryOnce(
     `${root}/users`,
