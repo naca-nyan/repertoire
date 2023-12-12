@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
-import { getSongsByScreenName, SongEntry } from "../data/song";
+import { watchSongsByScreenName, SongEntry } from "../data/song";
 import SongList from "../components/SongList";
 import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
@@ -60,12 +60,12 @@ const SongPage: React.FC = () => {
       setData(null);
       return;
     }
-    getSongsByScreenName(screenName)
-      .then(setData)
-      .catch((e) => {
-        console.warn(e);
-        setData(null);
-      });
+    try {
+      watchSongsByScreenName(screenName, setData);
+    } catch (e) {
+      console.warn(e);
+      setData(null);
+    }
   }, [screenName]);
 
   if (!screenName) return <NotFoundPage />;

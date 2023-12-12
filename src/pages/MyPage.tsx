@@ -13,7 +13,7 @@ import IosShareIcon from "@mui/icons-material/IosShare";
 import AddIcon from "@mui/icons-material/Add";
 
 import LoadingPage from "./LoadingPage";
-import { getSongs, pushSong, Song, SongEntry } from "../data/song";
+import { watchSongs, Song, SongEntry, setSong } from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
@@ -87,12 +87,7 @@ const MyPageContent: React.FC<{
   const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
-    getSongs(userId)
-      .then((songs) => setData(songs))
-      .catch(() => {
-        console.warn("Failed to fetch songs; fallback to []");
-        setData([]);
-      });
+    watchSongs(userId, (songs) => setData(songs));
   }, [userId]);
 
   if (data === undefined) {
@@ -100,9 +95,7 @@ const MyPageContent: React.FC<{
   }
 
   const onSubmitSong = (songId: string, song: Song) => {
-    pushSong(userId, songId, { ...song, createdAt: Date.now() })
-      .then((songId) => setData([...data, [songId, song]]))
-      .catch((e) => console.error("cannot push song", song, e));
+    setSong(userId, songId, { ...song, createdAt: Date.now() });
   };
 
   const shareURL = window.location.origin + "/users/" + user.screenName;
