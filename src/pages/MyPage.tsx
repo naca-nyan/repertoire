@@ -1,7 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Fab,
+  Snackbar,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Container } from "@mui/system";
 import IosShareIcon from "@mui/icons-material/IosShare";
+import AddIcon from "@mui/icons-material/Add";
+
 import LoadingPage from "./LoadingPage";
 import { getSongs, pushSong, Song, SongEntry } from "../data/song";
 import SongList from "../components/SongList";
@@ -41,11 +51,40 @@ const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
+const MainButton: React.FC<{
+  icon: React.ReactNode;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+}> = ({ icon, onClick }) => (
+  <>
+    <Box
+      sx={{
+        // button height + bottom height
+        height: 56 + 24,
+      }}
+    />
+    <Box
+      sx={{
+        maxWidth: "xl",
+        width: "100%",
+        position: "fixed",
+        bottom: 24,
+        textAlign: "end",
+        right: { xs: 24, sm: "auto" },
+      }}
+    >
+      <Fab onClick={onClick} color="primary" sx={{ right: { xs: 0, sm: 24 } }}>
+        {icon}
+      </Fab>
+    </Box>
+  </>
+);
+
 const MyPageContent: React.FC<{
   user: User;
 }> = ({ user }) => {
   const userId = user.userId;
   const [data, setData] = useState<undefined | SongEntry[]>(undefined);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     getSongs(userId)
@@ -60,7 +99,7 @@ const MyPageContent: React.FC<{
     return <LoadingPage />;
   }
 
-  const onAddSong = (songId: string, song: Song) => {
+  const onSubmitSong = (songId: string, song: Song) => {
     pushSong(userId, songId, { ...song, createdAt: Date.now() })
       .then((songId) => setData([...data, [songId, song]]))
       .catch((e) => console.error("cannot push song", song, e));
@@ -78,7 +117,13 @@ const MyPageContent: React.FC<{
         <ShareButton url={shareURL} />
       </Stack>
       <SongList data={data} collapsed={false} songAction={EditButton} />
-      <SongSubmitForm artists={artistsUniq} onAddSong={onAddSong} />
+      <SongSubmitForm
+        open={formOpen}
+        artists={artistsUniq}
+        onSubmit={onSubmitSong}
+        onClose={() => setFormOpen(false)}
+      />
+      <MainButton icon={<AddIcon />} onClick={() => setFormOpen(true)} />
     </Container>
   );
 };

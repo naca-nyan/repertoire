@@ -1,9 +1,8 @@
 import React, { ChangeEventHandler, useState } from "react";
-import { Add, Close } from "@mui/icons-material";
+import { Close } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
-  Fab,
   Fade,
   IconButton,
   Modal,
@@ -32,13 +31,18 @@ const textfieldStyle = {
 };
 
 interface Props {
+  open: boolean;
   artists: string[];
-  onAddSong: (songId: string, song: Song) => void;
+  onSubmit: (songId: string, song: Song) => void;
+  onClose: () => void;
 }
 
-const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
-  const [open, setOpen] = useState(false);
-
+const SongSubmitForm: React.FC<Props> = ({
+  open,
+  artists,
+  onSubmit,
+  onClose,
+}) => {
   const [url, setURL] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -50,11 +54,11 @@ const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
     setTitle("");
     setArtist("");
     setHelperText("");
-    setOpen(false);
+    onClose();
   }
 
-  function handleClose() {
-    if (title || artist || url) return;
+  function handleModalClose() {
+    if (url || title || artist) return;
     clearAndClose();
   }
 
@@ -107,7 +111,7 @@ const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
-      onAddSong(songId, song);
+      onSubmit(songId, song);
       clearAndClose();
     } catch (e) {
       if (e instanceof Error) {
@@ -117,80 +121,54 @@ const SongSubmitForm: React.FC<Props> = ({ artists, onAddSong }) => {
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          // button height + bottom height
-          height: 56 + 24,
-        }}
-      />
-      <Box
-        sx={{
-          maxWidth: "xl",
-          width: "100%",
-          position: "fixed",
-          bottom: 24,
-          textAlign: "end",
-          right: { xs: 24, sm: "auto" },
-        }}
-      >
-        <Fab
-          onClick={() => setOpen(true)}
-          color="primary"
-          sx={{ right: { xs: 0, sm: 24 } }}
-        >
-          <Add />
-        </Fab>
-      </Box>
-      <Modal open={open} onClose={handleClose}>
-        <Fade in={open}>
-          <Box sx={boxStyle}>
-            <IconButton onClick={handleCancel} sx={{ float: "right", mb: 2 }}>
-              <Close />
-            </IconButton>
-            <TextField
-              id="url"
-              label="URL"
-              autoComplete="off"
-              error={Boolean(helperText)}
-              onChange={handleOnChange}
-              sx={textfieldStyle}
-              helperText={helperText}
-            />
-            <TextField
-              id="title"
-              label="曲名"
-              value={title}
-              autoComplete="off"
-              error={Boolean(helperText)}
-              onChange={handleOnChange}
-              sx={textfieldStyle}
-            />
-            <Autocomplete
-              id="artist"
-              freeSolo
-              options={artists}
-              onChange={(_, value) => setArtist(value ?? "")}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="アーティスト名"
-                  error={Boolean(helperText)}
-                  sx={textfieldStyle}
-                />
-              )}
-            />
-            <Button
-              variant="contained"
-              onClick={handleClickAdd}
-              sx={{ float: "right", mb: 2 }}
-            >
-              Add
-            </Button>
-          </Box>
-        </Fade>
-      </Modal>
-    </>
+    <Modal open={open} onClose={handleModalClose}>
+      <Fade in={open}>
+        <Box sx={boxStyle}>
+          <IconButton onClick={handleCancel} sx={{ float: "right", mb: 2 }}>
+            <Close />
+          </IconButton>
+          <TextField
+            id="url"
+            label="URL"
+            autoComplete="off"
+            error={Boolean(helperText)}
+            onChange={handleOnChange}
+            sx={textfieldStyle}
+            helperText={helperText}
+          />
+          <TextField
+            id="title"
+            label="曲名"
+            value={title}
+            autoComplete="off"
+            error={Boolean(helperText)}
+            onChange={handleOnChange}
+            sx={textfieldStyle}
+          />
+          <Autocomplete
+            id="artist"
+            freeSolo
+            options={artists}
+            onChange={(_, value) => setArtist(value ?? "")}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="アーティスト名"
+                error={Boolean(helperText)}
+                sx={textfieldStyle}
+              />
+            )}
+          />
+          <Button
+            variant="contained"
+            onClick={handleClickAdd}
+            sx={{ float: "right", mb: 2 }}
+          >
+            Add
+          </Button>
+        </Box>
+      </Fade>
+    </Modal>
   );
 };
 
