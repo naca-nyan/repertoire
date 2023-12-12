@@ -172,6 +172,7 @@ const SongSubmitForm: React.FC<Props> = ({
               <TextField
                 {...params}
                 label="アーティスト名"
+                onChange={(e) => setArtist(e.target.value)}
                 error={Boolean(helperText)}
                 sx={textfieldStyle}
               />
