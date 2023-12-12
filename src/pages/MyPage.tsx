@@ -31,15 +31,16 @@ const ShareButton: React.FC<{ url: string }> = ({ url }) => {
     <Tooltip title="共有リンクをコピー">
       <Button
         onClick={copyShareURL}
+        startIcon={<IosShareIcon />}
         color="inherit"
         sx={{
+          px: "11px",
           backgroundColor: "#f2f2f2",
           "&:hover": { backgroundColor: "#e5e5e5" },
           borderRadius: "20px",
         }}
       >
-        <IosShareIcon />
-        <Typography sx={{ ml: "4px" }}>共有</Typography>
+        <Typography>共有</Typography>
         <Snackbar
           open={notifyOpen}
           autoHideDuration={3000}
