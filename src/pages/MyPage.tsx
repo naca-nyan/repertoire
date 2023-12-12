@@ -9,6 +9,7 @@ import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { User } from "../data/user";
+import EditButton from "../components/EditButton";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -76,7 +77,7 @@ const MyPageContent: React.FC<{
         </Typography>
         <ShareButton url={shareURL} />
       </Stack>
-      <SongList data={data} collapsed={false} />
+      <SongList data={data} collapsed={false} songAction={EditButton} />
       <SongSubmitForm artists={artistsUniq} onAddSong={onAddSong} />
     </Container>
   );

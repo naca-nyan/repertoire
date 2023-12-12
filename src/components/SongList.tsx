@@ -15,15 +15,12 @@ import { SongEntry } from "../data/song";
 import { siteKind, siteNames, toURL } from "./utils";
 import { Theme } from "@mui/material";
 import SiteIcon from "./SiteIcon";
-import StarButton from "./StarButton";
 
-const SongItem: React.FC<{ songEntry: SongEntry }> = ({
-  songEntry: [songId, song],
-}) => (
-  <ListItem
-    disablePadding
-    secondaryAction={<StarButton songEntry={[songId, song]} />}
-  >
+const SongItem: React.FC<{
+  songEntry: SongEntry;
+  actionNode: React.ReactNode;
+}> = ({ songEntry: [songId, song], actionNode }) => (
+  <ListItem disablePadding secondaryAction={actionNode}>
     <Tooltip arrow title={siteNames[siteKind(songId)]} placement="left">
       <ListItemButton
         component="a"
@@ -47,10 +44,10 @@ const SongListOfArtist: React.FC<{
   artist: string;
   songEntries: SongEntry[];
   open?: boolean;
-}> = (props) => {
-  const { artist, songEntries } = props;
-  useEffect(() => setOpen(props.open ?? true), [props.open]);
-  const [open, setOpen] = useState(props.open ?? true);
+  songAction: React.FC<{ songEntry: SongEntry }>;
+}> = ({ artist, songEntries, open: openInitial, songAction }) => {
+  useEffect(() => setOpen(openInitial ?? true), [openInitial]);
+  const [open, setOpen] = useState(openInitial ?? true);
   return (
     <Card sx={{ marginBottom: 2 }}>
       <ListItemButton
@@ -64,8 +61,12 @@ const SongListOfArtist: React.FC<{
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        {songEntries.map(([songId, song]) => (
-          <SongItem songEntry={[songId, song]} key={songId} />
+        {songEntries.map((songEntry) => (
+          <SongItem
+            key={songEntry[0]}
+            songEntry={songEntry}
+            actionNode={songAction({ songEntry })}
+          />
         ))}
       </Collapse>
     </Card>
@@ -84,7 +85,8 @@ function uniqByArtist(songEntries: SongEntry[]): Record<string, SongEntry[]> {
 const SongList: React.FC<{
   data: SongEntry[];
   collapsed: boolean;
-}> = ({ data, collapsed }) => {
+  songAction: React.FC<{ songEntry: SongEntry }>;
+}> = ({ data, collapsed, songAction }) => {
   const uniq = uniqByArtist(data);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
@@ -100,6 +102,7 @@ const SongList: React.FC<{
           artist={artist}
           songEntries={songs}
           open={!collapsed}
+          songAction={songAction}
         />
       ))}
     </List>

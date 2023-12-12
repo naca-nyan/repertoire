@@ -7,6 +7,7 @@ import SongList from "../components/SongList";
 import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
+import StarButton from "../components/StarButton";
 
 function filterSongs(songEntries: SongEntry[], filter: string): SongEntry[] {
   const filterLowerCase = filter.toLowerCase();
@@ -45,7 +46,7 @@ const SongPageContent: React.FC<{
       <Box sx={{ marginTop: 1, marginBottom: 2 }}>
         <SearchBar onInput={(v) => setFilter(v)} />
       </Box>
-      <SongList data={filtered} collapsed={collapsed} />
+      <SongList data={filtered} collapsed={collapsed} songAction={StarButton} />
     </>
   );
 };
