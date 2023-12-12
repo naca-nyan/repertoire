@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useState } from "react";
+import React, { ChangeEventHandler, useEffect, useState } from "react";
 import { Close } from "@mui/icons-material";
 import {
   Autocomplete,
@@ -9,8 +9,8 @@ import {
   TextField,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { Song } from "../data/song";
-import { fromURL } from "./utils";
+import { Song, SongEntry } from "../data/song";
+import { fromURL, toURL } from "./utils";
 
 const boxStyle = {
   position: "absolute",
@@ -32,6 +32,7 @@ const textfieldStyle = {
 
 interface Props {
   open: boolean;
+  formData?: SongEntry;
   artists: string[];
   onSubmit: (songId: string, song: Song) => void;
   onClose: () => void;
@@ -39,6 +40,7 @@ interface Props {
 
 const SongSubmitForm: React.FC<Props> = ({
   open,
+  formData,
   artists,
   onSubmit,
   onClose,
@@ -48,6 +50,15 @@ const SongSubmitForm: React.FC<Props> = ({
   const [artist, setArtist] = useState("");
 
   const [helperText, setHelperText] = useState("");
+
+  useEffect(() => {
+    if (formData) {
+      const [songId, song] = formData;
+      if (songId) setURL(toURL(songId, song).href);
+      if (song.title) setTitle(song.title);
+      if (song.artist) setArtist(song.artist);
+    }
+  }, [formData]);
 
   function clearAndClose() {
     setURL("");
@@ -111,6 +122,11 @@ const SongSubmitForm: React.FC<Props> = ({
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
+      if (formData) {
+        const [, oldSong] = formData;
+        if (oldSong.comment) song.comment = oldSong.comment;
+        if (oldSong.createdAt) song.createdAt = oldSong.createdAt;
+      }
       onSubmit(songId, song);
       clearAndClose();
     } catch (e) {
@@ -129,6 +145,7 @@ const SongSubmitForm: React.FC<Props> = ({
           </IconButton>
           <TextField
             id="url"
+            value={url}
             label="URL"
             autoComplete="off"
             error={Boolean(helperText)}
@@ -147,6 +164,7 @@ const SongSubmitForm: React.FC<Props> = ({
           />
           <Autocomplete
             id="artist"
+            value={artist}
             freeSolo
             options={artists}
             onChange={(_, value) => setArtist(value ?? "")}
