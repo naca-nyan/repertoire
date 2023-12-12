@@ -14,7 +14,7 @@ const Star: React.FC<{
   colored?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }> = ({ colored, title, onClick }) => (
-  <Tooltip title={title}>
+  <Tooltip title={title} disableInteractive>
     <IconButton edge="end" onClick={onClick}>
       <StarIcon
         fontSize="small"
