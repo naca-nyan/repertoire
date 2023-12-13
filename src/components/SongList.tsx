@@ -18,9 +18,12 @@ import SiteIcon from "./SiteIcon";
 
 const SongItem: React.FC<{
   songEntry: SongEntry;
-  actionNode: React.ReactNode;
-}> = ({ songEntry: [songId, song], actionNode }) => (
-  <ListItem disablePadding secondaryAction={actionNode}>
+  songAction: React.FC<{ songEntry: SongEntry }>;
+}> = ({ songEntry: [songId, song], songAction }) => (
+  <ListItem
+    disablePadding
+    secondaryAction={songAction({ songEntry: [songId, song] })}
+  >
     <Tooltip arrow title={siteNames[siteKind(songId)]} placement="left">
       <ListItemButton
         component="a"
@@ -46,8 +49,8 @@ const SongListOfArtist: React.FC<{
   open?: boolean;
   songAction: React.FC<{ songEntry: SongEntry }>;
 }> = ({ artist, songEntries, open: openInitial, songAction }) => {
-  useEffect(() => setOpen(openInitial ?? true), [openInitial]);
   const [open, setOpen] = useState(openInitial ?? true);
+  useEffect(() => setOpen(openInitial ?? true), [openInitial]);
   return (
     <Card sx={{ marginBottom: 2 }}>
       <ListItemButton
@@ -65,7 +68,7 @@ const SongListOfArtist: React.FC<{
           <SongItem
             key={songEntry[0]}
             songEntry={songEntry}
-            actionNode={songAction({ songEntry })}
+            songAction={songAction}
           />
         ))}
       </Collapse>

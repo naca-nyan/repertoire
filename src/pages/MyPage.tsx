@@ -20,6 +20,7 @@ import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { User } from "../data/user";
 import EditButton from "../components/EditButton";
+import FromClipboardForm from "../components/FromClipboardForm";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -86,6 +87,7 @@ const MyPageContent: React.FC<{
   const userId = user.userId;
   const [data, setData] = useState<undefined | SongEntry[]>(undefined);
   const [formOpen, setFormOpen] = useState(false);
+  const [FromClipboardFormOpen, setFromClipboardFormOpen] = useState(false);
 
   useEffect(() => {
     watchSongs(userId, (songs) => setData(songs));
@@ -109,6 +111,18 @@ const MyPageContent: React.FC<{
           {user.displayName}の知ってる曲リスト
         </Typography>
         <ShareButton url={shareURL} />
+        <div style={{ flexGrow: 1 }} />
+        <Button
+          variant="outlined"
+          onClick={() => setFromClipboardFormOpen(true)}
+        >
+          クリップボードから追加
+        </Button>
+        <FromClipboardForm
+          userId={userId}
+          open={FromClipboardFormOpen}
+          onClose={() => setFromClipboardFormOpen(false)}
+        />
       </Stack>
       <SongList data={data} collapsed={false} songAction={EditButton} />
       <SongSubmitForm
