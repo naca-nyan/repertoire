@@ -9,10 +9,18 @@ export type User = AuthUser & {
 };
 
 export function getScreenName(authuser: AuthUser): string {
-  // FIXME: safe method to get screen name
-  // @ts-ignore
-  const screenName: string | undefined = authuser.reloadUserInfo?.screenName;
-  return screenName ?? "";
+  // FIXME: better method to get screen name
+  if (!("reloadUserInfo" in authuser)) return "";
+  const reloadUserInfo = authuser.reloadUserInfo;
+  if (
+    typeof reloadUserInfo !== "object" ||
+    reloadUserInfo === null ||
+    !("screenName" in reloadUserInfo)
+  )
+    return "";
+  const screenName = reloadUserInfo.screenName;
+  if (typeof screenName !== "string") return "";
+  return screenName;
 }
 
 export function setScreenName(uid: string, screenName: string): Promise<void> {

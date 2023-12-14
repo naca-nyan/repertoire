@@ -23,13 +23,21 @@ export interface Song {
 
 export type SongEntry = [songId: string, song: Song];
 
-export function isSong(x: any): x is Song {
+export function isSong(x: unknown): x is Song {
   return (
+    typeof x === "object" &&
+    x !== null &&
+    "artist" in x &&
     typeof x.artist === "string" &&
+    "title" in x &&
     typeof x.title === "string" &&
+    "key" in x &&
     ["number", "undefined"].includes(typeof x.key) &&
+    "symbol" in x &&
     ["string", "undefined"].includes(typeof x.symbol) &&
+    "comment" in x &&
     ["string", "undefined"].includes(typeof x.comment) &&
+    "createdAt" in x &&
     ["number", "undefined"].includes(typeof x.createdAt)
   );
 }
@@ -103,6 +111,6 @@ export async function watchSongsByScreenName(
   );
   const snapshot = await get(q);
   if (!snapshot.exists()) throw new Error("Such screen name does not exist");
-  let userId: string = Object.keys(snapshot.val())[0];
+  const userId: string = Object.keys(snapshot.val())[0];
   watchSongs(userId, onSongsChange);
 }
