@@ -101,6 +101,7 @@ const MyPageContent: React.FC<{
         <Button
           variant="outlined"
           onClick={() => setFromClipboardFormOpen(true)}
+          sx={{ display: { xs: "none", md: "flex" } }}
         >
           クリップボードから追加
         </Button>
