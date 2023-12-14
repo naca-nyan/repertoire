@@ -65,12 +65,10 @@ const SongPage: React.FC = () => {
       setData(null);
       return;
     }
-    try {
-      watchSongsByScreenName(screenName, setData);
-    } catch (e) {
+    watchSongsByScreenName(screenName, setData).catch((e) => {
       console.warn(e);
       setData(null);
-    }
+    });
   }, [screenName]);
 
   if (!screenName) return <NotFoundPage />;
