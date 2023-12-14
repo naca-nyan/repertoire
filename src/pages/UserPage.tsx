@@ -47,6 +47,11 @@ const SongPageContent: React.FC<{
         <SearchBar onInput={(v) => setFilter(v)} />
       </Box>
       <SongList data={filtered} collapsed={collapsed} songAction={StarButton} />
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center" }}>
+          <Typography>曲がありません</Typography>
+        </div>
+      )}
     </>
   );
 };
