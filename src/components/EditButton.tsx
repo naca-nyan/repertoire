@@ -21,7 +21,7 @@ const EditButton: React.FC<{ songEntry: SongEntry }> = ({
 }) => {
   const [formOpen, setFormOpen] = useState(false);
   const us = useContext(UserStateContext);
-  const userId = us.state === "signed in" ? us.user.userId : null;
+  const userId = us.state === "signedIn" ? us.user.userId : null;
   if (userId === null) return <Edit title="編集するときはログインしてね" />;
 
   const onClick = () => {

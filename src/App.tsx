@@ -5,40 +5,29 @@ import UserPage from "./pages/UserPage";
 import MyPage from "./pages/MyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { defaultUserState, UserState, UserStateContext } from "./contexts/user";
-import {
-  signInWithRedirect,
-  signOut as authSignOut,
-  updateProfile,
-} from "firebase/auth";
+import { User } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { auth, provider } from "./firebase";
-import { getScreenName, setScreenName } from "./data/user";
+import { auth } from "./firebase";
+import { setOrGetScreenName } from "./auth";
 
 const App: React.FC = () => {
   const [userState, setUserState] = useState<UserState>(defaultUserState);
 
+  const handleChangeAuth = async (user: User | null) => {
+    if (user === null) {
+      setUserState({ state: "signedOut" });
+    } else {
+      const screenName = await setOrGetScreenName(user);
+      const displayName = user.displayName ?? "";
+      const userId = user.uid;
+      const photoURL = user.photoURL ?? "";
+      const userInfo = { screenName, userId, displayName, photoURL };
+      setUserState({ state: "signedIn", user: userInfo });
+    }
+  };
   useEffect(() => {
-    const signIn = () => signInWithRedirect(auth, provider);
-    const signOut = () =>
-      authSignOut(auth).then(() =>
-        setUserState({ state: "signed out", signIn })
-      );
-    auth.onAuthStateChanged((authUser) => {
-      let userState: UserState;
-      if (authUser === null) {
-        userState = { state: "signed out", signIn };
-      } else {
-        const userId = authUser.uid;
-        const screenName = getScreenName(authUser);
-        if (screenName) setScreenName(userId, screenName);
-        const photoURL = authUser.providerData[0]?.photoURL;
-        if (photoURL && photoURL !== authUser.photoURL)
-          updateProfile(authUser, { photoURL });
-        const user = { ...authUser, userId, screenName };
-        userState = { state: "signed in", user, signOut };
-      }
-      setUserState(userState);
-    });
+    const unsubscribe = auth.onAuthStateChanged(handleChangeAuth);
+    return unsubscribe;
   }, []);
 
   return (

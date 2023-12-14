@@ -102,12 +102,12 @@ export async function watchSongsByScreenName(
   screenName: string,
   onSongsChange: (songEntries: SongEntry[]) => void
 ) {
-  const lowerScreenName = screenName.toLocaleLowerCase();
+  const screenNameLowerCase = screenName.toLocaleLowerCase();
   const path = `${root}/users`;
   const q = query(
     ref(db, path),
-    orderByChild("screenName"),
-    equalTo(lowerScreenName)
+    orderByChild("screenNameLowerCase"),
+    equalTo(screenNameLowerCase)
   );
   const snapshot = await get(q);
   if (!snapshot.exists()) throw new Error("Such screen name does not exist");

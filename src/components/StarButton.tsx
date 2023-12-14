@@ -28,7 +28,7 @@ const StarButton: React.FC<{ songEntry: SongEntry }> = ({
   songEntry: [songId, song],
 }) => {
   const us = useContext(UserStateContext);
-  const userId = us.state === "signed in" ? us.user.userId : null;
+  const userId = us.state === "signedIn" ? us.user.userId : null;
   const [favd, setFavd] = useState(false);
   useEffect(() => {
     if (!userId) return;
