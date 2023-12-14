@@ -57,7 +57,7 @@ function parseRowsFromHtml(html: string): Cell[][] {
 }
 
 const NONE = "";
-const ImportTable: React.FC<{
+const ColumnsSettingTable: React.FC<{
   rows: Cell[][];
   error: string;
   onChangeColumns: (indexOf: Record<ImportColumns, number>) => void;
@@ -125,7 +125,7 @@ const ImportTable: React.FC<{
   );
 };
 
-const ImportingRow: React.FC<{
+const ResultRow: React.FC<{
   userId: string;
   row: Cell[];
   indexOf: Record<ImportColumns, number>;
@@ -165,7 +165,7 @@ const ImportingRow: React.FC<{
   );
 };
 
-const ImportingTable: React.FC<{
+const ResultTable: React.FC<{
   userId: string;
   rows: Cell[][];
   indexOf: Record<ImportColumns, number>;
@@ -188,7 +188,7 @@ const ImportingTable: React.FC<{
       </TableHead>
       <TableBody>
         {rows.map((row, i) => (
-          <ImportingRow userId={userId} row={row} indexOf={indexOf} key={i} />
+          <ResultRow userId={userId} row={row} indexOf={indexOf} key={i} />
         ))}
       </TableBody>
     </Table>
@@ -215,14 +215,14 @@ const FromClipboardForm: React.FC<{
   onClose: () => void;
 }> = ({ userId, open, onClose }) => {
   const [rows, setRows] = useState<Cell[][]>([]);
-  const [phase, setPhase] = useState(1);
+  const [ready, setReady] = useState(false);
   const [indexOf, setIndexOf] =
     useState<Record<ImportColumns, number>>(defaultIndexOf);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!open) return;
-    setPhase(1);
+    setReady(false);
     setError("");
     setIndexOf(defaultIndexOf);
     getHtmlFromClipboard()
@@ -235,20 +235,24 @@ const FromClipboardForm: React.FC<{
       setError("インポートする項目が足りません");
       return;
     }
-    setPhase(2);
+    setReady(true);
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg">
       <DialogTitle>クリップボードから追加</DialogTitle>
       <DialogContent>
-        <Typography>
-          {rows.length > 0
-            ? "インポートする列を設定してください。未選択の列は無視されます。"
-            : "曲データが見つかりませんでした"}
-        </Typography>
-        {phase === 1 && (
-          <ImportTable
+        {rows.length > 0 ? (
+          <Typography>
+            インポートする列を設定してください。未選択の列は無視されます。
+          </Typography>
+        ) : (
+          <Typography maxWidth="410px">
+            曲データが見つかりませんでした。スプレッドシートのインポートする部分をコピーしてください。
+          </Typography>
+        )}
+        {!ready ? (
+          <ColumnsSettingTable
             rows={rows}
             error={error}
             onChangeColumns={(indexOf) => {
@@ -256,14 +260,13 @@ const FromClipboardForm: React.FC<{
               setError("");
             }}
           />
-        )}
-        {phase === 2 && (
-          <ImportingTable userId={userId} rows={rows} indexOf={indexOf} />
+        ) : (
+          <ResultTable userId={userId} rows={rows} indexOf={indexOf} />
         )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>閉じる</Button>
-        {rows.length > 0 && phase === 1 && (
+        {rows.length > 0 && !ready && (
           <Button variant="contained" onClick={onSubmit} autoFocus>
             追加する
           </Button>

@@ -3,32 +3,15 @@ import { Add, Close, Delete, Done } from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
-  Fade,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
-  Modal,
   TextField,
 } from "@mui/material";
-import { Box } from "@mui/system";
 import { Song, SongEntry } from "../data/song";
 import { fromURL, toURL } from "./utils";
-
-const boxStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  maxWidth: "sm",
-  bgcolor: "white",
-  border: "2px solid #000",
-  boxShadow: 24,
-  px: 4,
-  py: 2,
-};
-
-const textfieldStyle = {
-  width: "100%",
-  mb: 4,
-};
 
 interface Props {
   open: boolean;
@@ -145,69 +128,82 @@ const SongSubmitForm: React.FC<Props> = ({
   };
 
   return (
-    <Modal open={open} onClose={handleModalClose}>
-      <Fade in={open}>
-        <Box sx={boxStyle}>
-          <IconButton onClick={handleCancel} sx={{ float: "right", mb: 2 }}>
-            <Close />
-          </IconButton>
-          <TextField
-            id="url"
-            value={url}
-            label="URL"
-            autoComplete="off"
-            error={Boolean(helperText)}
-            onChange={handleOnChange}
-            sx={textfieldStyle}
-            helperText={helperText}
-          />
-          <TextField
-            id="title"
-            label="曲名"
-            value={title}
-            autoComplete="off"
-            error={Boolean(helperText)}
-            onChange={handleOnChange}
-            sx={textfieldStyle}
-          />
-          <Autocomplete
-            id="artist"
-            value={artist}
-            freeSolo
-            options={artists}
-            onChange={(_, value) => setArtist(value ?? "")}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="アーティスト名"
-                onChange={(e) => setArtist(e.target.value)}
-                error={Boolean(helperText)}
-                sx={textfieldStyle}
-              />
-            )}
-          />
-          {onDelete && (
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<Delete />}
-              onClick={handleClickDelete}
-              sx={{ float: "left", mb: 2 }}
-            >
-              削除
-            </Button>
+    <Dialog open={open} onClose={handleModalClose}>
+      <DialogTitle>
+        <IconButton onClick={handleCancel} sx={{ float: "right" }}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          id="url"
+          value={url}
+          label="URL"
+          fullWidth
+          autoComplete="off"
+          error={Boolean(helperText)}
+          onChange={handleOnChange}
+          helperText={helperText}
+          sx={{ mt: 1, mb: 4 }}
+        />
+        <TextField
+          id="title"
+          value={title}
+          label="曲名"
+          fullWidth
+          autoComplete="off"
+          error={Boolean(helperText)}
+          onChange={handleOnChange}
+          sx={{ mb: 4 }}
+        />
+        <Autocomplete
+          id="artist"
+          value={artist}
+          freeSolo
+          options={artists}
+          onChange={(_, value) => setArtist(value ?? "")}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="アーティスト名"
+              onChange={(e) => setArtist(e.target.value)}
+              error={Boolean(helperText)}
+            />
           )}
+        />
+      </DialogContent>
+      {formData ? (
+        <DialogActions
+          sx={{ justifyContent: "space-between", px: 3, pt: 1, pb: 3 }}
+        >
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Delete />}
+            onClick={handleClickDelete}
+          >
+            削除
+          </Button>
           <Button
             variant="contained"
-            startIcon={formData ? <Done /> : <Add />}
+            startIcon={<Done />}
             onClick={handleClickAdd}
-            sx={{ float: "right", mb: 2 }}
           >
-            {formData ? "更新" : "知ってる曲に追加"}
+            更新
           </Button>
-        </Box>
-      </Fade>
-    </Modal>
+        </DialogActions>
+      ) : (
+        <DialogActions sx={{ px: 3, pt: 1, pb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={handleClickAdd}
+          >
+            知ってる曲に追加
+          </Button>
+        </DialogActions>
+      )}
+    </Dialog>
   );
 };
 

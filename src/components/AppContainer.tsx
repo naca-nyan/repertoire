@@ -60,7 +60,7 @@ const AppContainer: React.FC = () => {
   return (
     <div className="App">
       <AppBar position="relative">
-        <Container maxWidth="lg">
+        <Container maxWidth="xl">
           <Toolbar>
             <LibraryMusic sx={{ display: "flex", mr: 1 }} />
             <Link

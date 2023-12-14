@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Fab,
+  Link,
   Snackbar,
   Stack,
   Tooltip,
@@ -53,32 +54,17 @@ const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
-const MainButton: React.FC<{
+const FloatingActionButton: React.FC<{
   icon: React.ReactNode;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
 }> = ({ icon, onClick }) => (
-  <>
-    <Box
-      sx={{
-        // button height + bottom height
-        height: 56 + 24,
-      }}
-    />
-    <Box
-      sx={{
-        maxWidth: "xl",
-        width: "100%",
-        position: "fixed",
-        bottom: 24,
-        textAlign: "end",
-        right: { xs: 24, sm: "auto" },
-      }}
-    >
-      <Fab onClick={onClick} color="primary" sx={{ right: { xs: 0, sm: 24 } }}>
-        {icon}
-      </Fab>
-    </Box>
-  </>
+  <Fab
+    onClick={onClick}
+    color="primary"
+    sx={{ position: "absolute", bottom: 32, right: 32 }}
+  >
+    {icon}
+  </Fab>
 );
 
 const MyPageContent: React.FC<{
@@ -115,6 +101,7 @@ const MyPageContent: React.FC<{
         <Button
           variant="outlined"
           onClick={() => setFromClipboardFormOpen(true)}
+          sx={{ display: { xs: "none", md: "flex" } }}
         >
           クリップボードから追加
         </Button>
@@ -124,6 +111,22 @@ const MyPageContent: React.FC<{
           onClose={() => setFromClipboardFormOpen(false)}
         />
       </Stack>
+      {data.length === 0 && (
+        <div style={{ textAlign: "center" }}>
+          <Typography sx={{ mt: 6 }}>
+            曲が登録されていません。右下の「＋」ボタンから曲を登録しましょう！
+          </Typography>
+          <Typography sx={{ mt: 1 }}>
+            詳しい使い方は
+            <Link
+              href="https://github.com/naca-nyan/repertoire/wiki"
+              target="_blank"
+            >
+              こちら
+            </Link>
+          </Typography>
+        </div>
+      )}
       <SongList data={data} collapsed={false} songAction={EditButton} />
       <SongSubmitForm
         open={formOpen}
@@ -131,7 +134,10 @@ const MyPageContent: React.FC<{
         onSubmit={onSubmitSong}
         onClose={() => setFormOpen(false)}
       />
-      <MainButton icon={<AddIcon />} onClick={() => setFormOpen(true)} />
+      <FloatingActionButton
+        icon={<AddIcon />}
+        onClick={() => setFormOpen(true)}
+      />
     </Container>
   );
 };
