@@ -31,14 +31,11 @@ export function isSong(x: unknown): x is Song {
     typeof x.artist === "string" &&
     "title" in x &&
     typeof x.title === "string" &&
-    "key" in x &&
-    ["number", "undefined"].includes(typeof x.key) &&
-    "symbol" in x &&
-    ["string", "undefined"].includes(typeof x.symbol) &&
-    "comment" in x &&
-    ["string", "undefined"].includes(typeof x.comment) &&
-    "createdAt" in x &&
-    ["number", "undefined"].includes(typeof x.createdAt)
+    (!("key" in x) || ["number", "undefined"].includes(typeof x.key)) &&
+    (!("symbol" in x) || ["string", "undefined"].includes(typeof x.symbol)) &&
+    (!("comment" in x) || ["string", "undefined"].includes(typeof x.comment)) &&
+    (!("createdAt" in x) ||
+      ["number", "undefined"].includes(typeof x.createdAt))
   );
 }
 
@@ -56,9 +53,12 @@ function snapshotToSongs(snapshot: DataSnapshot): SongEntry[] {
     const songId = child.key;
     const song = child.val();
     if (songId === null) throw new Error("Invalid ID: songId is null");
-    if (!isSong(song))
-      throw new Error("Type validation failed: a value of child is not song");
-    songEntries.push([songId, song]);
+    if (isSong(song)) songEntries.push([songId, song]);
+    else
+      console.error(
+        "Type validation failed: a value of child is not song:",
+        song
+      );
   });
   return songEntries;
 }
