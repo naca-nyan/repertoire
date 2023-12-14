@@ -242,11 +242,15 @@ const FromClipboardForm: React.FC<{
     <Dialog open={open} onClose={onClose} maxWidth="lg">
       <DialogTitle>クリップボードから追加</DialogTitle>
       <DialogContent>
-        <Typography>
-          {rows.length > 0
-            ? "インポートする列を設定してください。未選択の列は無視されます。"
-            : "曲データが見つかりませんでした"}
-        </Typography>
+        {rows.length > 0 ? (
+          <Typography>
+            インポートする列を設定してください。未選択の列は無視されます。
+          </Typography>
+        ) : (
+          <Typography maxWidth="410px">
+            曲データが見つかりませんでした。スプレッドシートのインポートする部分をコピーしてください。
+          </Typography>
+        )}
         {phase === 1 && (
           <ImportTable
             rows={rows}
