@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# Repertoire
+
+A service that allows to register chord charts and sheet music of their repertoire and share them with others.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
