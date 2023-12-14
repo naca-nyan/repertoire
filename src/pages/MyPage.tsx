@@ -60,7 +60,7 @@ const FloatingActionButton: React.FC<{
   <Fab
     onClick={onClick}
     color="primary"
-    sx={{ position: "absolute", bottom: 32, right: 32 }}
+    sx={{ position: "fixed", bottom: 32, right: 32 }}
   >
     {icon}
   </Fab>
