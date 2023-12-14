@@ -4,6 +4,7 @@ import { Container } from "@mui/system";
 import { UserStateContext } from "../contexts/user";
 import LoadingPage from "./LoadingPage";
 import { Link } from "react-router-dom";
+import { signIn } from "../auth";
 
 const TopPage: React.FC = () => {
   const us = useContext(UserStateContext);
@@ -27,11 +28,11 @@ const TopPage: React.FC = () => {
       <Divider />
       {us.state === "loading" ? (
         <LoadingPage />
-      ) : us.state === "signed out" ? (
+      ) : us.state === "signedOut" ? (
         <>
           <Typography sx={{ mt: 6, mb: 1 }}>始めるには</Typography>
           <Button
-            onClick={us.signIn}
+            onClick={signIn}
             variant="contained"
             sx={{ textTransform: "none" }}
           >

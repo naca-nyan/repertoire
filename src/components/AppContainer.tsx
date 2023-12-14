@@ -13,10 +13,11 @@ import {
 import { Container } from "@mui/system";
 import { LibraryMusic } from "@mui/icons-material";
 import { Link, Outlet } from "react-router-dom";
-import { User } from "firebase/auth";
 import { UserStateContext } from "../contexts/user";
+import { signIn, signOut } from "../auth";
+import { UserInfo } from "../data/user";
 
-const AvatarMenu: React.FC<{ user: User; signOut: () => void }> = ({
+const AvatarMenu: React.FC<{ user: UserInfo; signOut: () => void }> = ({
   user,
   signOut,
 }) => {
@@ -78,12 +79,12 @@ const AppContainer: React.FC = () => {
             </Link>
             {us.state === "loading" ? (
               <CircularProgress color="inherit" />
-            ) : us.state === "signed out" ? (
-              <Button color="inherit" onClick={us.signIn}>
+            ) : us.state === "signedOut" ? (
+              <Button color="inherit" onClick={signIn}>
                 Log in
               </Button>
             ) : (
-              <AvatarMenu user={us.user} signOut={us.signOut} />
+              <AvatarMenu user={us.user} signOut={signOut} />
             )}
           </Toolbar>
         </Container>

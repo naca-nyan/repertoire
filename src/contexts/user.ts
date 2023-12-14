@@ -1,10 +1,10 @@
 import { createContext } from "react";
-import { User } from "../data/user";
+import { UserInfo } from "../data/user";
 
 export type UserState =
   | { state: "loading" }
-  | { state: "signed out"; signIn: () => void }
-  | { state: "signed in"; user: User; signOut: () => void };
+  | { state: "signedOut" }
+  | { state: "signedIn"; user: UserInfo };
 
 export const defaultUserState: UserState = {
   state: "loading",

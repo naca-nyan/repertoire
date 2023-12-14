@@ -18,7 +18,7 @@ import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
-import { User } from "../data/user";
+import { UserInfo } from "../data/user";
 import EditButton from "../components/EditButton";
 import FromClipboardForm from "../components/FromClipboardForm";
 
@@ -60,14 +60,14 @@ const FloatingActionButton: React.FC<{
   <Fab
     onClick={onClick}
     color="primary"
-    sx={{ position: "absolute", bottom: 32, right: 32 }}
+    sx={{ position: "fixed", bottom: 32, right: 32 }}
   >
     {icon}
   </Fab>
 );
 
 const MyPageContent: React.FC<{
-  user: User;
+  user: UserInfo;
 }> = ({ user }) => {
   const userId = user.userId;
   const [data, setData] = useState<undefined | SongEntry[]>(undefined);
@@ -144,7 +144,7 @@ const MyPageContent: React.FC<{
 const MyPage: React.FC = () => {
   const us = useContext(UserStateContext);
   if (us.state === "loading") return <LoadingPage />;
-  if (us.state === "signed out") return <UnauthorizedPage />;
+  if (us.state === "signedOut") return <UnauthorizedPage />;
 
   return <MyPageContent user={us.user} />;
 };
