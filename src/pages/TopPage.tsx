@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Button, Divider, Typography } from "@mui/material";
+import { Button, Divider, Link as MuiLink, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import { UserStateContext } from "../contexts/user";
 import LoadingPage from "./LoadingPage";
@@ -12,8 +12,17 @@ const TopPage: React.FC = () => {
       <Typography variant="h5" sx={{ mt: 10, color: "primary" }}>
         『Repertoire』
       </Typography>
-      <Typography variant="body1" sx={{ mt: 1, mb: 6, mx: 10 }}>
+      <Typography sx={{ mt: 1, mx: 10 }}>
         は演奏できるレパートリーのコード譜や楽譜を登録して、みんなと共有できるサービスです。
+      </Typography>
+      <Typography sx={{ mt: 1, mb: 6, mx: 10 }}>
+        使い方は
+        <MuiLink
+          href="https://github.com/naca-nyan/repertoire/wiki"
+          target="_blank"
+        >
+          こちら
+        </MuiLink>
       </Typography>
       <Divider />
       {us.state === "loading" ? (

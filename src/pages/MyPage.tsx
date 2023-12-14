@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Fab,
+  Link,
   Snackbar,
   Stack,
   Tooltip,
@@ -124,6 +125,22 @@ const MyPageContent: React.FC<{
           onClose={() => setFromClipboardFormOpen(false)}
         />
       </Stack>
+      {data.length === 0 && (
+        <div style={{ textAlign: "center" }}>
+          <Typography sx={{ mt: 6 }}>
+            曲が登録されていません。右下の「＋」ボタンから曲を登録しましょう！
+          </Typography>
+          <Typography sx={{ mt: 1 }}>
+            詳しい使い方は
+            <Link
+              href="https://github.com/naca-nyan/repertoire/wiki"
+              target="_blank"
+            >
+              こちら
+            </Link>
+          </Typography>
+        </div>
+      )}
       <SongList data={data} collapsed={false} songAction={EditButton} />
       <SongSubmitForm
         open={formOpen}
