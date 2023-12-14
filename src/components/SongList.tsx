@@ -112,4 +112,4 @@ const SongList: React.FC<{
   );
 };
 
-export default React.memo(SongList);
+export default SongList;
