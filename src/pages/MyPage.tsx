@@ -87,7 +87,7 @@ const MyPageContent: React.FC<{
   };
 
   const shareURL = window.location.origin + "/users/" + user.screenName;
-  const artists = data.map(([_, song]) => song.artist);
+  const artists = data.map(([, song]) => song.artist);
   const artistsUniq = [...new Set(artists)];
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>

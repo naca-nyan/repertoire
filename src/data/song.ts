@@ -23,14 +23,19 @@ export interface Song {
 
 export type SongEntry = [songId: string, song: Song];
 
-export function isSong(x: any): x is Song {
+export function isSong(x: unknown): x is Song {
   return (
+    typeof x === "object" &&
+    x !== null &&
+    "artist" in x &&
     typeof x.artist === "string" &&
+    "title" in x &&
     typeof x.title === "string" &&
-    ["number", "undefined"].includes(typeof x.key) &&
-    ["string", "undefined"].includes(typeof x.symbol) &&
-    ["string", "undefined"].includes(typeof x.comment) &&
-    ["number", "undefined"].includes(typeof x.createdAt)
+    (!("key" in x) || ["number", "undefined"].includes(typeof x.key)) &&
+    (!("symbol" in x) || ["string", "undefined"].includes(typeof x.symbol)) &&
+    (!("comment" in x) || ["string", "undefined"].includes(typeof x.comment)) &&
+    (!("createdAt" in x) ||
+      ["number", "undefined"].includes(typeof x.createdAt))
   );
 }
 
@@ -48,9 +53,12 @@ function snapshotToSongs(snapshot: DataSnapshot): SongEntry[] {
     const songId = child.key;
     const song = child.val();
     if (songId === null) throw new Error("Invalid ID: songId is null");
-    if (!isSong(song))
-      throw new Error("Type validation failed: a value of child is not song");
-    songEntries.push([songId, song]);
+    if (isSong(song)) songEntries.push([songId, song]);
+    else
+      console.error(
+        "Type validation failed: a value of child is not song:",
+        song
+      );
   });
   return songEntries;
 }
@@ -103,6 +111,6 @@ export async function watchSongsByScreenName(
   );
   const snapshot = await get(q);
   if (!snapshot.exists()) throw new Error("Such screen name does not exist");
-  let userId: string = Object.keys(snapshot.val())[0];
+  const userId: string = Object.keys(snapshot.val())[0];
   watchSongs(userId, onSongsChange);
 }

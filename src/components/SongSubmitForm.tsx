@@ -72,7 +72,7 @@ const SongSubmitForm: React.FC<Props> = ({
     }
   };
 
-  const handleOnChange: ChangeEventHandler<any> = (e) => {
+  const handleOnChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const id = e.currentTarget.id;
     const value = e.currentTarget.value;
     if (id === "url") {
