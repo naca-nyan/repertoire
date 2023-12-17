@@ -7,14 +7,8 @@ const urls: Record<SiteKind, string> = {
   youtube: "/youtube.png",
 };
 
-const style = {
-  width: "16px",
-  height: "16px",
-  marginRight: "4px",
-};
-
 const SiteIcon: React.FC<{ kind: SiteKind }> = ({ kind }) => (
-  <img src={urls[kind]} alt={siteNames[kind]} style={style}></img>
+  <img src={urls[kind]} alt={siteNames[kind]} />
 );
 
 export default SiteIcon;
