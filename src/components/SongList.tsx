@@ -6,6 +6,7 @@ import {
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
   Tooltip,
   Typography,
@@ -18,30 +19,51 @@ import SiteIcon from "./SiteIcon";
 
 const SongItem: React.FC<{
   songEntry: SongEntry;
-  songAction: React.FC<{ songEntry: SongEntry }>;
-}> = ({ songEntry: [songId, song], songAction }) => (
-  <ListItem
-    disablePadding
-    secondaryAction={songAction({ songEntry: [songId, song] })}
-  >
-    <Tooltip arrow title={siteNames[siteKind(songId)]} placement="left">
-      <ListItemButton
-        component="a"
-        href={toURL(songId, song).href}
-        target="_blank"
-        rel="noopener"
-      >
-        <ListItemText>
-          <SiteIcon kind={siteKind(songId)} />
-          <Link component="span">{song.title}</Link>
-          <Typography sx={{ float: "right", color: "#999", fontSize: "1em" }}>
-            {song.comment}
-          </Typography>
-        </ListItemText>
-      </ListItemButton>
-    </Tooltip>
-  </ListItem>
-);
+  SongAction: React.FC<{ songEntry: SongEntry }>;
+}> = ({ songEntry, SongAction }) => {
+  const [songId, song] = songEntry;
+  const secondaryAction = <SongAction songEntry={songEntry} />;
+  const kind = siteKind(songId);
+  return (
+    <ListItem disablePadding secondaryAction={secondaryAction}>
+      <Tooltip arrow title={siteNames[kind]} placement="left">
+        <ListItemButton
+          component="a"
+          href={toURL(songId, song).href}
+          target="_blank"
+          rel="noopener"
+        >
+          <ListItemIcon sx={{ minWidth: "20px" }}>
+            <SiteIcon kind={kind} />
+          </ListItemIcon>
+          <ListItemText>
+            <Link component="span">{song.title}</Link>
+            {!!song.key && (
+              <Typography
+                sx={{
+                  display: "inline-block",
+                  fontSize: ".86em",
+                  textAlign: "center",
+                  color: "#999",
+                  backgroundColor: "#f2f2f2",
+                  borderRadius: "50%",
+                  width: "16px",
+                  height: "16px",
+                  ml: "4px",
+                }}
+              >
+                {song.key > 0 ? `+${song.key}` : `${song.key}`}
+              </Typography>
+            )}
+            <Typography sx={{ float: "right", color: "#999", fontSize: "1em" }}>
+              {song.comment}
+            </Typography>
+          </ListItemText>
+        </ListItemButton>
+      </Tooltip>
+    </ListItem>
+  );
+};
 
 const SongListOfArtist: React.FC<{
   artist: string;
@@ -53,22 +75,24 @@ const SongListOfArtist: React.FC<{
   useEffect(() => setOpen(openInitial ?? true), [openInitial]);
   return (
     <Card sx={{ marginBottom: 2 }}>
-      <ListItemButton
-        onClick={() => setOpen(!open)}
-        sx={{ paddingRight: "10px" }}
-      >
-        <ListItemText
-          primary={artist}
-          primaryTypographyProps={{ fontWeight: "bold" }}
-        />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItemButton>
+      <ListItem disableGutters disablePadding>
+        <ListItemButton
+          onClick={() => setOpen(!open)}
+          sx={{ paddingRight: "10px" }}
+        >
+          <ListItemText
+            primary={artist}
+            primaryTypographyProps={{ fontWeight: "bold" }}
+          />
+          {open ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+      </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
         {songEntries.map((songEntry) => (
           <SongItem
             key={songEntry[0]}
             songEntry={songEntry}
-            songAction={songAction}
+            SongAction={songAction}
           />
         ))}
       </Collapse>
@@ -89,7 +113,7 @@ const SongList: React.FC<{
   data: SongEntry[];
   collapsed: boolean;
   songAction: React.FC<{ songEntry: SongEntry }>;
-}> = ({ data, collapsed, songAction }) => {
+}> = React.memo(({ data, collapsed, songAction }) => {
   const uniq = uniqByArtist(data);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
@@ -110,6 +134,6 @@ const SongList: React.FC<{
       ))}
     </List>
   );
-};
+});
 
 export default SongList;

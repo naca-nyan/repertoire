@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, useEffect, useMemo, useState } from "react";
 import { Add, Close, Delete, Done } from "@mui/icons-material";
 import {
   Autocomplete,
@@ -8,10 +8,12 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  InputAdornment,
   TextField,
 } from "@mui/material";
 import { Song, SongEntry } from "../data/song";
-import { fromURL, toURL } from "./utils";
+import { fromURL, siteKind, toURL } from "./utils";
+import SiteIcon from "./SiteIcon";
 
 interface Props {
   open: boolean;
@@ -44,6 +46,15 @@ const SongSubmitForm: React.FC<Props> = ({
       if (song.artist) setArtist(song.artist);
     }
   }, [formData]);
+
+  const kind = useMemo(() => {
+    try {
+      const { songId } = fromURL(new URL(url));
+      return siteKind(songId);
+    } catch {
+      return "unknown";
+    }
+  }, [url]);
 
   function clearAndClose() {
     setURL("");
@@ -144,6 +155,13 @@ const SongSubmitForm: React.FC<Props> = ({
           error={Boolean(helperText)}
           onChange={handleOnChange}
           helperText={helperText}
+          InputProps={{
+            endAdornment: kind !== "unknown" && (
+              <InputAdornment position="end">
+                <SiteIcon kind={kind} />
+              </InputAdornment>
+            ),
+          }}
           sx={{ mt: 1, mb: 4 }}
         />
         <TextField
@@ -160,6 +178,7 @@ const SongSubmitForm: React.FC<Props> = ({
           id="artist"
           value={artist}
           freeSolo
+          disableClearable
           options={artists}
           onChange={(_, value) => setArtist(value ?? "")}
           renderInput={(params) => (
