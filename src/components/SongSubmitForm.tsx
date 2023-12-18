@@ -178,6 +178,7 @@ const SongSubmitForm: React.FC<Props> = ({
           id="artist"
           value={artist}
           freeSolo
+          disableClearable
           options={artists}
           onChange={(_, value) => setArtist(value ?? "")}
           renderInput={(params) => (
