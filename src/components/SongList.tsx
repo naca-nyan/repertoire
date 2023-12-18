@@ -113,7 +113,7 @@ const SongList: React.FC<{
   data: SongEntry[];
   collapsed: boolean;
   songAction: React.FC<{ songEntry: SongEntry }>;
-}> = ({ data, collapsed, songAction }) => {
+}> = React.memo(({ data, collapsed, songAction }) => {
   const uniq = uniqByArtist(data);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
@@ -134,6 +134,6 @@ const SongList: React.FC<{
       ))}
     </List>
   );
-};
+});
 
 export default SongList;
