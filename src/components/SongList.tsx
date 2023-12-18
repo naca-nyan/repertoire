@@ -38,6 +38,23 @@ const SongItem: React.FC<{
           </ListItemIcon>
           <ListItemText>
             <Link component="span">{song.title}</Link>
+            {!!song.key && (
+              <Typography
+                sx={{
+                  display: "inline-block",
+                  fontSize: ".86em",
+                  textAlign: "center",
+                  color: "#999",
+                  backgroundColor: "#f2f2f2",
+                  borderRadius: "50%",
+                  width: "16px",
+                  height: "16px",
+                  ml: "4px",
+                }}
+              >
+                {song.key > 0 ? `+${song.key}` : `${song.key}`}
+              </Typography>
+            )}
             <Typography sx={{ float: "right", color: "#999", fontSize: "1em" }}>
               {song.comment}
             </Typography>
