@@ -1,15 +1,25 @@
 import React, { ChangeEventHandler, useEffect, useMemo, useState } from "react";
-import { Add, Close, Delete, Done } from "@mui/icons-material";
+import {
+  Add,
+  Close,
+  Delete,
+  Done,
+  ExpandLess,
+  ExpandMore,
+} from "@mui/icons-material";
 import {
   Autocomplete,
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   IconButton,
   InputAdornment,
+  Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Song, SongEntry } from "../data/song";
 import { fromURL, siteKind, toURL } from "./utils";
@@ -35,6 +45,8 @@ const SongSubmitForm: React.FC<Props> = ({
   const [url, setURL] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
+  const [comment, setComment] = useState("");
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const [helperText, setHelperText] = useState("");
 
@@ -44,6 +56,7 @@ const SongSubmitForm: React.FC<Props> = ({
       if (songId) setURL(toURL(songId, song).href);
       if (song.title) setTitle(song.title);
       if (song.artist) setArtist(song.artist);
+      if (song.comment) setComment(song.comment);
     }
   }, [formData]);
 
@@ -60,6 +73,7 @@ const SongSubmitForm: React.FC<Props> = ({
     setURL("");
     setTitle("");
     setArtist("");
+    setComment("");
     setHelperText("");
     onClose();
   }
@@ -92,6 +106,7 @@ const SongSubmitForm: React.FC<Props> = ({
     }
     if (id === "title") setTitle(value);
     if (id === "artist") setArtist(value);
+    if (id === "comment") setComment(value);
     if (validate() === true) setHelperText("");
   };
 
@@ -118,9 +133,9 @@ const SongSubmitForm: React.FC<Props> = ({
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
+      if (comment) song.comment = comment;
       if (formData) {
         const [, oldSong] = formData;
-        if (oldSong.comment) song.comment = oldSong.comment;
         if (oldSong.createdAt) song.createdAt = oldSong.createdAt;
       }
       onSubmit(songId, song);
@@ -190,6 +205,24 @@ const SongSubmitForm: React.FC<Props> = ({
             />
           )}
         />
+        <Stack direction="row" justifyContent="flex-end" alignItems="center">
+          <Typography>その他</Typography>
+          <IconButton size="small" onClick={() => setDetailOpen(!detailOpen)}>
+            {detailOpen ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </Stack>
+        <Collapse in={detailOpen}>
+          <TextField
+            id="comment"
+            value={comment}
+            label="コメント"
+            fullWidth
+            autoComplete="off"
+            error={Boolean(helperText)}
+            onChange={handleOnChange}
+            sx={{}}
+          />
+        </Collapse>
       </DialogContent>
       {formData ? (
         <DialogActions

@@ -29,7 +29,7 @@ const EditButton: React.FC<{ songEntry: SongEntry }> = ({
   };
   const onUpdate = async (songIdNew: string, songNew: Song) => {
     if (songId !== songIdNew) await removeSong(userId, songId);
-    await setSong(userId, songId, songNew);
+    await setSong(userId, songIdNew, songNew);
   };
   const onDelete = async (songId: string) => {
     await removeSong(userId, songId);

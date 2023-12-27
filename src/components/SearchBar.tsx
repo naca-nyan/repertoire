@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { useDebounce } from "react-use";
-import { alpha, InputBase, styled } from "@mui/material";
+import {
+  alpha,
+  IconButton,
+  InputAdornment,
+  InputBase,
+  styled,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -45,6 +52,20 @@ const SearchBar: React.FC<{
 }> = ({ onInput }) => {
   const [input, setInput] = useState("");
   useDebounce(() => onInput(input), 300, [input]);
+  const [showClearButton, setShowClearButton] = useState(false);
+  const ClearButon = (
+    <InputAdornment position="end">
+      <IconButton
+        disableRipple
+        onClick={() => {
+          setInput("");
+          setShowClearButton(false);
+        }}
+      >
+        <ClearIcon />
+      </IconButton>
+    </InputAdornment>
+  );
   return (
     <Search>
       <SearchIconWrapper>
@@ -54,7 +75,10 @@ const SearchBar: React.FC<{
         value={input}
         placeholder="Search..."
         inputProps={{ "aria-label": "search" }}
+        endAdornment={showClearButton && ClearButon}
         onChange={(e) => setInput(e.target.value)}
+        onFocus={() => setShowClearButton(true)}
+        onBlur={() => input || setShowClearButton(false)}
       />
     </Search>
   );
