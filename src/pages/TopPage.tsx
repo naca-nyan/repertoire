@@ -5,11 +5,13 @@ import { UserStateContext } from "../contexts/user";
 import LoadingPage from "./LoadingPage";
 import { Link } from "react-router-dom";
 import { signIn } from "../auth";
+import Header from "../components/Header";
 
 const TopPage: React.FC = () => {
   const us = useContext(UserStateContext);
   return (
     <Container maxWidth="sm" sx={{ pt: 2, textAlign: "center" }}>
+      <Header title="" />
       <Typography variant="h5" sx={{ mt: 10, color: "primary" }}>
         『Repertoire』
       </Typography>

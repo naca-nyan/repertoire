@@ -21,6 +21,7 @@ import UnauthorizedPage from "./UnauthorizedPage";
 import { UserInfo } from "../data/user";
 import EditButton from "../components/EditButton";
 import FromClipboardForm from "../components/FromClipboardForm";
+import Header from "../components/Header";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -146,7 +147,12 @@ const MyPage: React.FC = () => {
   if (us.state === "loading") return <LoadingPage />;
   if (us.state === "signedOut") return <UnauthorizedPage />;
 
-  return <MyPageContent user={us.user} />;
+  return (
+    <>
+      <Header title="マイページ" />
+      <MyPageContent user={us.user} />
+    </>
+  );
 };
 
 export default MyPage;
