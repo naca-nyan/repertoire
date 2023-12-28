@@ -8,6 +8,7 @@ import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import StarButton from "../components/StarButton";
+import Header from "../components/Header";
 
 function filterSongs(songEntries: SongEntry[], filter: string): SongEntry[] {
   const filterLowerCase = filter.toLowerCase();
@@ -77,6 +78,7 @@ const SongPage: React.FC = () => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
+      <Header title={`${screenName} さんの知ってる曲`} />
       <SongPageContent screenName={screenName} data={data} />
     </Container>
   );
