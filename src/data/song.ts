@@ -1,5 +1,6 @@
 import {
   DataSnapshot,
+  Unsubscribe,
   equalTo,
   get,
   onValue,
@@ -63,13 +64,13 @@ function snapshotToSongs(snapshot: DataSnapshot): SongEntry[] {
   return songEntries;
 }
 
-export async function watchSongs(
+export function watchSongs(
   userId: string,
   onSongsChange: (songEntries: SongEntry[]) => void
-) {
+): Unsubscribe {
   if (userId === "") throw new Error("invalid username");
   const songRef = ref(db, `${root}/users/${userId}/songs/`);
-  onValue(query(songRef, orderByChild("createdAt")), (snapshot) => {
+  return onValue(query(songRef, orderByChild("createdAt")), (snapshot) => {
     const songEntries = snapshotToSongs(snapshot);
     onSongsChange(songEntries);
   });
@@ -91,17 +92,19 @@ export function onSongExists(
   userId: string,
   songId: string,
   callback: (songExists: boolean) => void
-) {
-  onValue(ref(db, `${root}/users/${userId}/songs/${songId}`), (snapshot) => {
-    const songExists = snapshot.exists();
-    callback(songExists);
-  });
+): Unsubscribe {
+  return onValue(
+    ref(db, `${root}/users/${userId}/songs/${songId}`),
+    (snapshot) => {
+      const songExists = snapshot.exists();
+      callback(songExists);
+    }
+  );
 }
 
-export async function watchSongsByScreenName(
-  screenName: string,
-  onSongsChange: (songEntries: SongEntry[]) => void
-) {
+export async function getUserIdByScreenName(
+  screenName: string
+): Promise<string> {
   const screenNameLowerCase = screenName.toLocaleLowerCase();
   const path = `${root}/users`;
   const q = query(
@@ -112,5 +115,5 @@ export async function watchSongsByScreenName(
   const snapshot = await get(q);
   if (!snapshot.exists()) throw new Error("Such screen name does not exist");
   const userId: string = Object.keys(snapshot.val())[0];
-  watchSongs(userId, onSongsChange);
+  return userId;
 }

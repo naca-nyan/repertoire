@@ -76,7 +76,7 @@ const MyPageContent: React.FC<{
   const [FromClipboardFormOpen, setFromClipboardFormOpen] = useState(false);
 
   useEffect(() => {
-    watchSongs(userId, (songs) => setData(songs));
+    return watchSongs(userId, (songs) => setData(songs));
   }, [userId]);
 
   if (data === undefined) {

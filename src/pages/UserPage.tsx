@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
-import { watchSongsByScreenName, SongEntry } from "../data/song";
+import { SongEntry, watchSongs, getUserIdByScreenName } from "../data/song";
 import SongList from "../components/SongList";
 import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
@@ -60,17 +60,22 @@ const SongPageContent: React.FC<{
 const SongPage: React.FC = () => {
   const { screenName } = useParams();
   const [data, setData] = useState<undefined | null | SongEntry[]>(undefined);
+  const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
     if (!screenName) {
       setData(null);
       return;
     }
-    watchSongsByScreenName(screenName, setData).catch((e) => {
-      console.warn(e);
-      setData(null);
-    });
+    getUserIdByScreenName(screenName)
+      .then((userId) => setUserId(userId))
+      .catch((e) => console.warn(e));
   }, [screenName]);
+
+  useEffect(() => {
+    if (!userId) return;
+    return watchSongs(userId, setData);
+  }, [userId]);
 
   if (!screenName) return <NotFoundPage />;
   if (data === undefined) return <LoadingPage />;
