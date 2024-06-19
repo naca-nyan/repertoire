@@ -52,6 +52,20 @@ export function fromURL(url: URL): {
       };
     }
   }
+  if (url.host === "chordwiki.jpn.org") {
+    // http://chordwiki.jpn.org/wiki.cgi?c=view&t=%A5%C0%A5%D6%A5%EB%A5%E9%A5%EA%A5%A2%A5%C3%A5%C8
+    if (url.pathname.startsWith("/wiki.cgi")) {
+      const searchParams = new URLSearchParams(unescape(url.search));
+      const raw = searchParams.get("t") ?? "";
+      if (!raw) throw new Error("Empty `t` value parsing chordwiki.jpn.org");
+      const decoder = new TextDecoder("euc-jp");
+      const id = decoder.decode(
+        new Uint8Array(raw.split("").map((c) => c.charCodeAt(0)))
+      );
+      if (!id) throw new Error("Empty songId parsing ja.chordwiki.org");
+      return { songId: `chordwiki:${id}` };
+    }
+  }
   if (url.host === "gakufu.gakki.me") {
     // https://gakufu.gakki.me/m/data/N13285.html
     if (url.pathname.endsWith(".html")) {
