@@ -88,7 +88,7 @@ export async function removeSong(userId: string, songId: string) {
   return remove(ref(db, `${root}/users/${userId}/songs/${songId}`));
 }
 
-export function onSongExists(
+export function watchSongExists(
   userId: string,
   songId: string,
   callback: (songExists: boolean) => void

@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
-import { onSongExists, removeSong, setSong, SongEntry } from "../data/song";
+import { watchSongExists, removeSong, setSong, SongEntry } from "../data/song";
 import { UserStateContext } from "../contexts/user";
 
 const Star: React.FC<{
@@ -32,7 +32,7 @@ const StarButton: React.FC<{ songEntry: SongEntry }> = ({
   const [favd, setFavd] = useState(false);
   useEffect(() => {
     if (!userId) return;
-    onSongExists(userId, songId, setFavd);
+    return watchSongExists(userId, songId, setFavd);
   }, [userId, songId]);
 
   if (userId === null)
