@@ -220,24 +220,21 @@ const defaultIndexOf = Object.fromEntries(
 
 const FromClipboardForm: React.FC<{
   userId: string;
+  rows: Cell[][];
   open: boolean;
   onClose: () => void;
-}> = ({ userId, open, onClose }) => {
-  const [rows, setRows] = useState<Cell[][]>([]);
+}> = ({ userId, rows, open, onClose: onCloseProp }) => {
   const [ready, setReady] = useState(false);
   const [indexOf, setIndexOf] =
     useState<Record<ImportColumns, number>>(defaultIndexOf);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!open) return;
+  const onClose = () => {
     setReady(false);
     setError("");
     setIndexOf(defaultIndexOf);
-    getHtmlFromClipboard()
-      .then((html) => setRows(parseRowsFromHtml(html)))
-      .catch(() => setRows([]));
-  }, [open]);
+    onCloseProp();
+  };
 
   const onSubmit = () => {
     if (importColumns.some((k) => indexOf[k] < 0)) {
@@ -288,21 +285,43 @@ const FromClipboardForm: React.FC<{
 const FromClipboard: React.FC<{
   userId: string;
 }> = ({ userId }) => {
-  const [FromClipboardFormOpen, setFromClipboardFormOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<Cell[][] | null>(null);
+  const onOpen = () => {
+    setOpen(true);
+    getHtmlFromClipboard()
+      .then((html) => setRows(parseRowsFromHtml(html)))
+      .catch(() => setRows([]));
+  };
+  const onClose = () => {
+    setRows(null);
+    setOpen(false);
+  };
+
   return (
     <>
       <Button
         variant="outlined"
-        onClick={() => setFromClipboardFormOpen(true)}
+        disabled={open}
+        onClick={onOpen}
         sx={{ display: { xs: "none", md: "flex" } }}
       >
         クリップボードから追加
       </Button>
-      <FromClipboardForm
-        userId={userId}
-        open={FromClipboardFormOpen}
-        onClose={() => setFromClipboardFormOpen(false)}
-      />
+      {rows !== null ? (
+        <FromClipboardForm
+          userId={userId}
+          rows={rows}
+          open={true}
+          onClose={onClose}
+        />
+      ) : (
+        <Dialog open={open}>
+          <DialogContent>
+            <CircularProgress />
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
