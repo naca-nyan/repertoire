@@ -1,5 +1,5 @@
 import {
-  signInWithRedirect,
+  signInWithPopup,
   signOut as authSignOut,
   User,
   updateProfile as authUpdateProfile,
@@ -10,7 +10,7 @@ import { auth, provider } from "./firebase";
 import { getScreenName, setScreenName } from "./data/user";
 
 export const signIn = async () => {
-  await signInWithRedirect(auth, provider);
+  await signInWithPopup(auth, provider);
 };
 
 export const signOut = async () => {
