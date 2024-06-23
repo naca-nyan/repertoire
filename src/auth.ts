@@ -1,23 +1,30 @@
-import * as Auth from "firebase/auth";
+import {
+  signInWithRedirect,
+  signOut as authSignOut,
+  User,
+  updateProfile as authUpdateProfile,
+  getRedirectResult,
+  getAdditionalUserInfo,
+} from "firebase/auth";
 import { auth, provider } from "./firebase";
 import { getScreenName, setScreenName } from "./data/user";
 
 export const signIn = async () => {
-  await Auth.signInWithRedirect(auth, provider);
+  await signInWithRedirect(auth, provider);
 };
 
 export const signOut = async () => {
-  await Auth.signOut(auth);
+  await authSignOut(auth);
   window.location.href = "/";
 };
 
-export const setOrGetScreenName = async (user: Auth.User) => {
+export const setOrGetScreenName = async (user: User) => {
   const userId = user.uid;
-  const userCredential = await Auth.getRedirectResult(auth);
+  const userCredential = await getRedirectResult(auth);
   if (userCredential) {
     await updateProfile(user);
 
-    const additionalUserInfo = Auth.getAdditionalUserInfo(userCredential);
+    const additionalUserInfo = getAdditionalUserInfo(userCredential);
     const screenName = additionalUserInfo?.username;
     if (!screenName) throw new Error("invalid screenName");
     await setScreenName(userId, screenName);
@@ -28,7 +35,7 @@ export const setOrGetScreenName = async (user: Auth.User) => {
   }
 };
 
-const updateProfile = async (user: Auth.User) => {
+const updateProfile = async (user: User) => {
   for (const data of user.providerData) {
     if (data.providerId === "twitter.com") {
       const newProfile: {
@@ -43,7 +50,7 @@ const updateProfile = async (user: Auth.User) => {
         newProfile.displayName = displayName;
 
       if (Object.keys(newProfile).length > 0)
-        Auth.updateProfile(user, newProfile);
+        authUpdateProfile(user, newProfile);
     }
   }
 };
