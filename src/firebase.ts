@@ -24,5 +24,6 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth();
+auth.languageCode = "ja";
 export const provider = new TwitterAuthProvider();
 export const database = getDatabase();
