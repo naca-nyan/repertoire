@@ -196,13 +196,22 @@ const ResultTable: React.FC<{
 };
 
 function songIdFromCell(cell: Cell) {
-  try {
-    const url = new URL(cell.href ?? "");
-    return fromURL(url);
-  } catch {
-    const url = new URL(cell.text);
-    return fromURL(url);
+  const getURL = (cell: Cell) => {
+    const urlCandidates = [cell.href ?? "", cell.text];
+    for (const candidate of urlCandidates) {
+      try {
+        return new URL(candidate);
+      } catch {
+        continue;
+      }
+    }
+    return null;
+  };
+  const url = getURL(cell);
+  if (url === null) {
+    throw new Error("Failed to get URL from cell");
   }
+  return fromURL(url);
 }
 
 const defaultIndexOf = Object.fromEntries(
