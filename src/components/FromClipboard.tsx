@@ -81,7 +81,11 @@ const ColumnsSettingTable: React.FC<{
   const colSize = rows[0]?.length ?? 0;
   const [selected, setSelected] = useState<string[]>([]);
   useEffect(() => setSelected(Array(colSize).fill(NONE)), [rows, colSize]);
-  const handleChangeSelect = (index: number, key: string) => {
+  const handleChangeSelect = (index: number, key: string | string[]) => {
+    if (typeof key === "object") {
+      console.log(key);
+      return;
+    }
     const newSelected = selected.map((k) => (k === key ? NONE : k));
     newSelected[index] = key;
     setSelected(newSelected);
@@ -104,9 +108,10 @@ const ColumnsSettingTable: React.FC<{
               <FormControl fullWidth error={Boolean(error)}>
                 <Select
                   fullWidth
-                  value={selected[i] ?? NONE}
+                  value={selected[i] ?? [NONE]}
                   variant={"standard"}
                   disableUnderline
+                  multiple
                   onChange={(e) => handleChangeSelect(i, e.target.value)}
                 >
                   <MenuItem value={NONE}>未選択</MenuItem>
