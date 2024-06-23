@@ -8,7 +8,7 @@ import { defaultUserState, UserState, UserStateContext } from "./contexts/user";
 import { User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
-import { setOrGetScreenName } from "./auth";
+import { getScreenName } from "./data/user";
 
 const App: React.FC = () => {
   const [userState, setUserState] = useState<UserState>(defaultUserState);
@@ -17,7 +17,7 @@ const App: React.FC = () => {
     if (user === null) {
       setUserState({ state: "signedOut" });
     } else {
-      const screenName = await setOrGetScreenName(user);
+      const screenName = await getScreenName(user.uid);
       const displayName = user.displayName ?? "";
       const userId = user.uid;
       const photoURL = user.photoURL ?? "";
