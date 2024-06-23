@@ -3,36 +3,25 @@ import {
   signOut as authSignOut,
   User,
   updateProfile as authUpdateProfile,
-  getRedirectResult,
   getAdditionalUserInfo,
 } from "firebase/auth";
 import { auth, provider } from "./firebase";
-import { getScreenName, setScreenName } from "./data/user";
+import { setScreenName } from "./data/user";
 
 export const signIn = async () => {
-  await signInWithPopup(auth, provider);
+  const userCredential = await signInWithPopup(auth, provider);
+  const user = userCredential.user;
+  const userId = user.uid;
+  await updateProfile(user);
+  const additionalUserInfo = getAdditionalUserInfo(userCredential);
+  const screenName = additionalUserInfo?.username;
+  if (!screenName) throw new Error("invalid screenName");
+  await setScreenName(userId, screenName);
 };
 
 export const signOut = async () => {
   await authSignOut(auth);
   window.location.href = "/";
-};
-
-export const setOrGetScreenName = async (user: User) => {
-  const userId = user.uid;
-  const userCredential = await getRedirectResult(auth);
-  if (userCredential) {
-    await updateProfile(user);
-
-    const additionalUserInfo = getAdditionalUserInfo(userCredential);
-    const screenName = additionalUserInfo?.username;
-    if (!screenName) throw new Error("invalid screenName");
-    await setScreenName(userId, screenName);
-    return screenName;
-  } else {
-    const screenName = await getScreenName(userId);
-    return screenName;
-  }
 };
 
 const updateProfile = async (user: User) => {

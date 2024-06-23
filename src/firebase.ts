@@ -1,8 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth, TwitterAuthProvider } from "firebase/auth";
-import { getDatabase } from "firebase/database";
+import {
+  connectAuthEmulator,
+  getAuth,
+  TwitterAuthProvider,
+} from "firebase/auth";
+import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -24,6 +28,8 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth();
+if (import.meta.env.DEV) connectAuthEmulator(auth, "http://127.0.0.1:9099");
 auth.languageCode = "ja";
 export const provider = new TwitterAuthProvider();
 export const database = getDatabase();
+if (import.meta.env.DEV) connectDatabaseEmulator(database, "127.0.0.1", 9000);
