@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import {
   Button,
   CircularProgress,
@@ -56,6 +56,22 @@ function parseRowsFromHtml(html: string): Cell[][] {
   );
 }
 
+const ColumnSettingTableBody: React.FC<{
+  rows: Cell[][];
+}> = memo(({ rows }) => (
+  <TableBody>
+    {rows.map((row, i) => (
+      <TableRow key={i}>
+        {row.map((cell, j) => (
+          <TableCell key={j}>
+            {cell.href ? <Link href={cell.href}>{cell.text}</Link> : cell.text}
+          </TableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableBody>
+));
+
 const NONE = "";
 const ColumnsSettingTable: React.FC<{
   rows: Cell[][];
@@ -106,21 +122,7 @@ const ColumnsSettingTable: React.FC<{
           ))}
         </TableRow>
       </TableHead>
-      <TableBody>
-        {rows.map((row, i) => (
-          <TableRow key={i}>
-            {row.map((cell, j) => (
-              <TableCell key={j}>
-                {cell.href ? (
-                  <Link href={cell.href}>{cell.text}</Link>
-                ) : (
-                  cell.text
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
+      <ColumnSettingTableBody rows={rows} />
     </Table>
   );
 };
