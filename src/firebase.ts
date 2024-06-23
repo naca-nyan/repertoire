@@ -10,7 +10,7 @@ import { getDatabase } from "firebase/database";
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDv2k8ZKmMEZeekgd_YGzCmVo1sIzGeglg",
-  authDomain: "syncroom-repertoire.firebaseapp.com",
+  authDomain: "syncroom-repertoire.web.app",
   databaseURL:
     "https://syncroom-repertoire-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "syncroom-repertoire",
@@ -24,5 +24,6 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth();
+auth.languageCode = "ja";
 export const provider = new TwitterAuthProvider();
 export const database = getDatabase();
