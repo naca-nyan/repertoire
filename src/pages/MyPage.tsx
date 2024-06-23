@@ -20,7 +20,7 @@ import { UserStateContext } from "../contexts/user";
 import UnauthorizedPage from "./UnauthorizedPage";
 import { UserInfo } from "../data/user";
 import EditButton from "../components/EditButton";
-import FromClipboardForm from "../components/FromClipboardForm";
+import FromClipboard from "../components/FromClipboard";
 import Header from "../components/Header";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
@@ -73,7 +73,6 @@ const MyPageContent: React.FC<{
   const userId = user.userId;
   const [data, setData] = useState<undefined | SongEntry[]>(undefined);
   const [formOpen, setFormOpen] = useState(false);
-  const [FromClipboardFormOpen, setFromClipboardFormOpen] = useState(false);
 
   useEffect(() => {
     return watchSongs(userId, (songs) => setData(songs));
@@ -98,18 +97,7 @@ const MyPageContent: React.FC<{
         </Typography>
         <ShareButton url={shareURL} />
         <div style={{ flexGrow: 1 }} />
-        <Button
-          variant="outlined"
-          onClick={() => setFromClipboardFormOpen(true)}
-          sx={{ display: { xs: "none", md: "flex" } }}
-        >
-          クリップボードから追加
-        </Button>
-        <FromClipboardForm
-          userId={userId}
-          open={FromClipboardFormOpen}
-          onClose={() => setFromClipboardFormOpen(false)}
-        />
+        <FromClipboard userId={userId} />
       </Stack>
       {data.length === 0 && (
         <div style={{ textAlign: "center" }}>

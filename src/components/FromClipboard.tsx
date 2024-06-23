@@ -285,4 +285,26 @@ const FromClipboardForm: React.FC<{
   );
 };
 
-export default FromClipboardForm;
+const FromClipboard: React.FC<{
+  userId: string;
+}> = ({ userId }) => {
+  const [FromClipboardFormOpen, setFromClipboardFormOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="outlined"
+        onClick={() => setFromClipboardFormOpen(true)}
+        sx={{ display: { xs: "none", md: "flex" } }}
+      >
+        クリップボードから追加
+      </Button>
+      <FromClipboardForm
+        userId={userId}
+        open={FromClipboardFormOpen}
+        onClose={() => setFromClipboardFormOpen(false)}
+      />
+    </>
+  );
+};
+
+export default FromClipboard;
