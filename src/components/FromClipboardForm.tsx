@@ -135,7 +135,8 @@ const ResultRow: React.FC<{
 
   useEffect(() => {
     try {
-      const { songId, key, symbol } = songIdFromCell(row[indexOf.url]);
+      const url = urlFromCell(row[indexOf.url]);
+      const { songId, key, symbol } = fromURL(url);
       const artist = row[indexOf.artist].text;
       const title = row[indexOf.title].text;
       const song: Song = { artist, title };
@@ -195,14 +196,16 @@ const ResultTable: React.FC<{
   );
 };
 
-function songIdFromCell(cell: Cell) {
-  try {
-    const url = new URL(cell.href ?? "");
-    return fromURL(url);
-  } catch {
-    const url = new URL(cell.text);
-    return fromURL(url);
+function urlFromCell(cell: Cell): URL {
+  const urlCandidates = [cell.href ?? "", cell.text];
+  for (const candidate of urlCandidates) {
+    try {
+      return new URL(candidate);
+    } catch {
+      continue;
+    }
   }
+  throw new Error("Invalid URL");
 }
 
 const defaultIndexOf = Object.fromEntries(
