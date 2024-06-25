@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import {
   Button,
   CircularProgress,
@@ -11,6 +11,7 @@ import {
   Link,
   MenuItem,
   Select,
+  SxProps,
   Table,
   TableBody,
   TableCell,
@@ -55,6 +56,22 @@ function parseRowsFromHtml(html: string): Cell[][] {
     }))
   );
 }
+
+const ColumnSettingTableBody: React.FC<{
+  rows: Cell[][];
+}> = memo(({ rows }) => (
+  <TableBody>
+    {rows.map((row, i) => (
+      <TableRow key={i}>
+        {row.map((cell, j) => (
+          <TableCell key={j}>
+            {cell.href ? <Link href={cell.href}>{cell.text}</Link> : cell.text}
+          </TableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableBody>
+));
 
 const NONE = "";
 const ColumnsSettingTable: React.FC<{
@@ -106,21 +123,7 @@ const ColumnsSettingTable: React.FC<{
           ))}
         </TableRow>
       </TableHead>
-      <TableBody>
-        {rows.map((row, i) => (
-          <TableRow key={i}>
-            {row.map((cell, j) => (
-              <TableCell key={j}>
-                {cell.href ? (
-                  <Link href={cell.href}>{cell.text}</Link>
-                ) : (
-                  cell.text
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
+      <ColumnSettingTableBody rows={rows} />
     </Table>
   );
 };
@@ -130,14 +133,17 @@ const ResultRow: React.FC<{
   row: Cell[];
   indexOf: Record<ImportColumns, number>;
 }> = ({ userId, row, indexOf }) => {
-  const [state, setState] = useState("doing");
+  const [state, setState] = useState<"doing" | "done" | "error">("doing");
   const [error, setError] = useState("");
 
   useEffect(() => {
     try {
-      const { songId, key, symbol } = songIdFromCell(row[indexOf.url]);
+      const url = urlFromCell(row[indexOf.url]);
+      const { songId, key, symbol } = fromURL(url);
       const artist = row[indexOf.artist].text;
+      if (!artist) throw new Error("Empty artist");
       const title = row[indexOf.title].text;
+      if (!title) throw new Error("Empty title");
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
@@ -195,40 +201,31 @@ const ResultTable: React.FC<{
   );
 };
 
-function songIdFromCell(cell: Cell) {
-  try {
-    const url = new URL(cell.href ?? "");
-    return fromURL(url);
-  } catch {
-    const url = new URL(cell.text);
-    return fromURL(url);
+function urlFromCell(cell: Cell): URL {
+  const urlCandidates = [cell.href ?? "", cell.text];
+  for (const candidate of urlCandidates) {
+    try {
+      return new URL(candidate);
+    } catch {
+      continue;
+    }
   }
+  throw new Error("Invalid URL");
 }
 
 const defaultIndexOf = Object.fromEntries(
   importColumns.map((c) => [c, -1])
 ) as Record<ImportColumns, number>;
 
-const FromClipboardForm: React.FC<{
+const FromClipboardContent: React.FC<{
   userId: string;
-  open: boolean;
+  rows: Cell[][];
   onClose: () => void;
-}> = ({ userId, open, onClose }) => {
-  const [rows, setRows] = useState<Cell[][]>([]);
+}> = ({ userId, rows, onClose }) => {
   const [ready, setReady] = useState(false);
   const [indexOf, setIndexOf] =
     useState<Record<ImportColumns, number>>(defaultIndexOf);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    setReady(false);
-    setError("");
-    setIndexOf(defaultIndexOf);
-    getHtmlFromClipboard()
-      .then((html) => setRows(parseRowsFromHtml(html)))
-      .catch(() => setRows([]));
-  }, [open]);
 
   const onSubmit = () => {
     if (importColumns.some((k) => indexOf[k] < 0)) {
@@ -239,7 +236,7 @@ const FromClipboardForm: React.FC<{
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg">
+    <>
       <DialogTitle>クリップボードから追加</DialogTitle>
       <DialogContent>
         {rows.length > 0 ? (
@@ -272,8 +269,43 @@ const FromClipboardForm: React.FC<{
           </Button>
         )}
       </DialogActions>
-    </Dialog>
+    </>
   );
 };
 
-export default FromClipboardForm;
+const FromClipboard: React.FC<{
+  userId: string;
+  sxButton: SxProps;
+}> = ({ userId, sxButton }) => {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<Cell[][] | null>(null);
+  const onOpen = () => {
+    setOpen(true);
+    getHtmlFromClipboard()
+      .then((html) => setRows(parseRowsFromHtml(html)))
+      .catch(() => setRows([]));
+  };
+  const onClose = () => {
+    setRows(null);
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <Button variant="outlined" disabled={open} onClick={onOpen} sx={sxButton}>
+        クリップボードから追加
+      </Button>
+      <Dialog open={open} onClose={onClose} maxWidth="lg">
+        {rows !== null ? (
+          <FromClipboardContent userId={userId} rows={rows} onClose={onClose} />
+        ) : (
+          <DialogContent>
+            <CircularProgress />
+          </DialogContent>
+        )}
+      </Dialog>
+    </>
+  );
+};
+
+export default FromClipboard;
