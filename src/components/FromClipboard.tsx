@@ -11,6 +11,7 @@ import {
   Link,
   MenuItem,
   Select,
+  SxProps,
   Table,
   TableBody,
   TableCell,
@@ -281,4 +282,23 @@ const FromClipboardForm: React.FC<{
   );
 };
 
-export default FromClipboardForm;
+const FromClipboard: React.FC<{
+  userId: string;
+  sxButton: SxProps;
+}> = ({ userId, sxButton }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button variant="outlined" onClick={() => setOpen(true)} sx={sxButton}>
+        クリップボードから追加
+      </Button>
+      <FromClipboardForm
+        userId={userId}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  );
+};
+
+export default FromClipboard;
