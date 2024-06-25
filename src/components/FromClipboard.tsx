@@ -133,7 +133,7 @@ const ResultRow: React.FC<{
   row: Cell[];
   indexOf: Record<ImportColumns, number>;
 }> = ({ userId, row, indexOf }) => {
-  const [state, setState] = useState("doing");
+  const [state, setState] = useState<"doing" | "done" | "error">("doing");
   const [error, setError] = useState("");
 
   useEffect(() => {
