@@ -40,6 +40,7 @@ const ShareButton: React.FC<{ url: string }> = ({ url }) => {
           backgroundColor: "#f2f2f2",
           "&:hover": { backgroundColor: "#e5e5e5" },
           borderRadius: "20px",
+          whiteSpace: "nowrap",
         }}
       >
         <Typography>共有</Typography>
