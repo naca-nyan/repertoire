@@ -215,26 +215,15 @@ const defaultIndexOf = Object.fromEntries(
   importColumns.map((c) => [c, -1])
 ) as Record<ImportColumns, number>;
 
-const FromClipboardForm: React.FC<{
+const FromClipboardContent: React.FC<{
   userId: string;
-  open: boolean;
+  rows: Cell[][];
   onClose: () => void;
-}> = ({ userId, open, onClose }) => {
-  const [rows, setRows] = useState<Cell[][]>([]);
+}> = ({ userId, rows, onClose }) => {
   const [ready, setReady] = useState(false);
   const [indexOf, setIndexOf] =
     useState<Record<ImportColumns, number>>(defaultIndexOf);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    setReady(false);
-    setError("");
-    setIndexOf(defaultIndexOf);
-    getHtmlFromClipboard()
-      .then((html) => setRows(parseRowsFromHtml(html)))
-      .catch(() => setRows([]));
-  }, [open]);
 
   const onSubmit = () => {
     if (importColumns.some((k) => indexOf[k] < 0)) {
@@ -245,7 +234,7 @@ const FromClipboardForm: React.FC<{
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg">
+    <>
       <DialogTitle>クリップボードから追加</DialogTitle>
       <DialogContent>
         {rows.length > 0 ? (
@@ -278,7 +267,7 @@ const FromClipboardForm: React.FC<{
           </Button>
         )}
       </DialogActions>
-    </Dialog>
+    </>
   );
 };
 
@@ -287,16 +276,32 @@ const FromClipboard: React.FC<{
   sxButton: SxProps;
 }> = ({ userId, sxButton }) => {
   const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<Cell[][] | null>(null);
+  const onOpen = () => {
+    setOpen(true);
+    getHtmlFromClipboard()
+      .then((html) => setRows(parseRowsFromHtml(html)))
+      .catch(() => setRows([]));
+  };
+  const onClose = () => {
+    setRows(null);
+    setOpen(false);
+  };
+
   return (
     <>
-      <Button variant="outlined" onClick={() => setOpen(true)} sx={sxButton}>
+      <Button variant="outlined" disabled={open} onClick={onOpen} sx={sxButton}>
         クリップボードから追加
       </Button>
-      <FromClipboardForm
-        userId={userId}
-        open={open}
-        onClose={() => setOpen(false)}
-      />
+      <Dialog open={open} onClose={onClose} maxWidth="lg">
+        {rows !== null ? (
+          <FromClipboardContent userId={userId} rows={rows} onClose={onClose} />
+        ) : (
+          <DialogContent>
+            <CircularProgress />
+          </DialogContent>
+        )}
+      </Dialog>
     </>
   );
 };
