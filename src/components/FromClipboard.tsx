@@ -141,7 +141,9 @@ const ResultRow: React.FC<{
       const url = urlFromCell(row[indexOf.url]);
       const { songId, key, symbol } = fromURL(url);
       const artist = row[indexOf.artist].text;
+      if (!artist) throw new Error("Empty artist");
       const title = row[indexOf.title].text;
+      if (!title) throw new Error("Empty title");
       const song: Song = { artist, title };
       if (key) song.key = key;
       if (symbol) song.symbol = symbol;
