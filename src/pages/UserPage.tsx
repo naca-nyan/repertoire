@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
-import { SongEntry, watchSongs, getUserIdByScreenName } from "../data/song";
+import {
+  SongEntry,
+  watchSongs,
+  getUserIdByScreenName,
+  watchOrderArtists,
+} from "../data/song";
 import SongList from "../components/SongList";
 import SearchBar from "../components/SearchBar";
 import NotFoundPage from "./NotFoundPage";
@@ -27,7 +32,8 @@ function filterSongs(songEntries: SongEntry[], filter: string): SongEntry[] {
 const SongPageContent: React.FC<{
   screenName: string;
   data: SongEntry[];
-}> = ({ screenName, data }) => {
+  orderArtist: string[];
+}> = ({ screenName, data, orderArtist }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [filter, setFilter] = useState("");
   const filtered = filter ? filterSongs(data, filter) : data;
@@ -47,7 +53,12 @@ const SongPageContent: React.FC<{
       <Box sx={{ marginTop: 1, marginBottom: 2 }}>
         <SearchBar onInput={(v) => setFilter(v)} />
       </Box>
-      <SongList data={filtered} collapsed={collapsed} songAction={StarButton} />
+      <SongList
+        songEntries={filtered}
+        sortBy={orderArtist}
+        collapsed={collapsed}
+        songAction={StarButton}
+      />
       {filtered.length === 0 && (
         <div style={{ textAlign: "center" }}>
           <Typography>曲がありません</Typography>
@@ -59,8 +70,9 @@ const SongPageContent: React.FC<{
 
 const SongPage: React.FC = () => {
   const { screenName } = useParams();
-  const [data, setData] = useState<undefined | null | SongEntry[]>(undefined);
   const [userId, setUserId] = useState<string>("");
+  const [data, setData] = useState<undefined | null | SongEntry[]>(undefined);
+  const [orderArtist, setOrderArtist] = useState<string[]>([]);
 
   useEffect(() => {
     if (!screenName) {
@@ -77,6 +89,11 @@ const SongPage: React.FC = () => {
     return watchSongs(userId, setData);
   }, [userId]);
 
+  useEffect(() => {
+    if (!userId) return;
+    return watchOrderArtists(userId, setOrderArtist);
+  }, [userId]);
+
   if (!screenName) return <NotFoundPage />;
   if (data === undefined) return <LoadingPage />;
   if (data === null) return <NotFoundPage />;
@@ -84,7 +101,11 @@ const SongPage: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
       <Header title={`${screenName} さんの知ってる曲`} />
-      <SongPageContent screenName={screenName} data={data} />
+      <SongPageContent
+        screenName={screenName}
+        data={data}
+        orderArtist={orderArtist}
+      />
     </Container>
   );
 };

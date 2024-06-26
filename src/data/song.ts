@@ -117,3 +117,18 @@ export async function getUserIdByScreenName(
   const userId: string = Object.keys(snapshot.val())[0];
   return userId;
 }
+
+export function watchOrderArtists(
+  userId: string,
+  callback: (order: string[]) => void
+): Unsubscribe {
+  return onValue(ref(db, `${root}/users/${userId}/orderArtist`), (snapshot) => {
+    const val = snapshot.val();
+    const order = Array.isArray(val) ? val : [];
+    callback(order);
+  });
+}
+
+export async function setOrderArtists(userId: string, order: string[]) {
+  return set(ref(db, `${root}/users/${userId}/orderArtist`), order);
+}
