@@ -100,21 +100,31 @@ const SongListOfArtist: React.FC<{
   );
 };
 
-function uniqByArtist(songEntries: SongEntry[]): Record<string, SongEntry[]> {
+function uniqByArtist(
+  songEntries: SongEntry[],
+  sortBy: string[]
+): Record<string, SongEntry[]> {
   const artists: Record<string, SongEntry[]> = {};
+  for (const artist of sortBy) {
+    artists[artist] = [];
+  }
   for (const [songId, song] of songEntries) {
     const songsOfTheArtist = artists[song.artist] ?? [];
     artists[song.artist] = [...songsOfTheArtist, [songId, song]];
+  }
+  for (const artist of sortBy) {
+    if (artists[artist].length === 0) delete artists[artist];
   }
   return artists;
 }
 
 const SongList: React.FC<{
-  data: SongEntry[];
+  songEntries: SongEntry[];
+  sortBy: string[];
   collapsed: boolean;
   songAction: React.FC<{ songEntry: SongEntry }>;
-}> = React.memo(({ data, collapsed, songAction }) => {
-  const uniq = uniqByArtist(data);
+}> = React.memo(({ songEntries, sortBy, collapsed, songAction }) => {
+  const uniq = uniqByArtist(songEntries, sortBy);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
     [theme.breakpoints.up("md")]: { columnCount: 3 },

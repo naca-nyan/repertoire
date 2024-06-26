@@ -13,9 +13,17 @@ import {
 import { Container } from "@mui/system";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import AddIcon from "@mui/icons-material/Add";
+import Check from "@mui/icons-material/Check";
 
 import LoadingPage from "./LoadingPage";
-import { watchSongs, Song, SongEntry, setSong } from "../data/song";
+import {
+  watchSongs,
+  Song,
+  SongEntry,
+  setSong,
+  setOrderArtists,
+  watchOrderArtists,
+} from "../data/song";
 import SongList from "../components/SongList";
 import SongSubmitForm from "../components/SongSubmitForm";
 import { UserStateContext } from "../contexts/user";
@@ -24,6 +32,8 @@ import { UserInfo } from "../data/user";
 import EditButton from "../components/EditButton";
 import FromClipboard from "../components/FromClipboard";
 import Header from "../components/Header";
+import SortableArtistList from "../components/SortableArtistList";
+import { MoveUp } from "@mui/icons-material";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -74,14 +84,23 @@ const MyPageContent: React.FC<{
   user: UserInfo;
 }> = ({ user }) => {
   const userId = user.userId;
-  const [data, setData] = useState<undefined | SongEntry[]>(undefined);
+  const [songEntries, setSongEntries] = useState<undefined | SongEntry[]>(
+    undefined
+  );
   const [formOpen, setFormOpen] = useState(false);
+  const [sortArtist, setSortArtist] = useState(false);
+  const [artists_, setArtists_] = useState<string[] | undefined>(undefined);
+  const artists = artists_ ?? [];
 
   useEffect(() => {
-    return watchSongs(userId, (songs) => setData(songs));
+    return watchSongs(userId, (songs) => setSongEntries(songs));
   }, [userId]);
 
-  if (data === undefined) {
+  useEffect(() => {
+    return watchOrderArtists(userId, (order) => setArtists_(order));
+  }, [userId]);
+
+  if (songEntries === undefined) {
     return <LoadingPage />;
   }
 
@@ -89,9 +108,22 @@ const MyPageContent: React.FC<{
     setSong(userId, songId, { ...song, createdAt: Date.now() });
   };
 
+  const setDefaultOrderArtists = () => {
+    if (!artists_ || !songEntries) return;
+    const res: Record<string, boolean> = {};
+    for (const artist of artists) {
+      res[artist] = false;
+    }
+    for (const [_, song] of songEntries) {
+      res[song.artist] = true;
+    }
+    for (const artist of artists) {
+      if (!res[artist]) delete res[artist];
+    }
+    setArtists_(Object.keys(res));
+  };
+
   const shareURL = window.location.origin + "/users/" + user.screenName;
-  const artists = data.map(([, song]) => song.artist);
-  const artistsUniq = [...new Set(artists)];
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
       <Grid container rowSpacing={1}>
@@ -106,10 +138,24 @@ const MyPageContent: React.FC<{
         <Grid item xs={12} sm={2}>
           <ButtonGroup style={{ display: "flex", justifyContent: "flex-end" }}>
             <FromClipboard userId={userId} />
+            <Tooltip title="アーティスト名を並び換え">
+              <Button
+                variant={sortArtist ? "contained" : "outlined"}
+                disabled={!artists_}
+                onClick={() => {
+                  if (!artists_) return;
+                  if (sortArtist) setOrderArtists(userId, artists_);
+                  else setDefaultOrderArtists();
+                  setSortArtist(!sortArtist);
+                }}
+              >
+                {sortArtist ? <Check /> : <MoveUp />}
+              </Button>
+            </Tooltip>
           </ButtonGroup>
         </Grid>
       </Grid>
-      {data.length === 0 && (
+      {songEntries.length === 0 && (
         <div style={{ textAlign: "center" }}>
           <Typography sx={{ mt: 6 }}>
             曲が登録されていません。右下の「＋」ボタンから曲を登録しましょう！
@@ -125,10 +171,19 @@ const MyPageContent: React.FC<{
           </Typography>
         </div>
       )}
-      <SongList data={data} collapsed={false} songAction={EditButton} />
+      {sortArtist ? (
+        <SortableArtistList artists={artists} onSortEnd={setArtists_} />
+      ) : (
+        <SongList
+          songEntries={songEntries}
+          sortBy={artists}
+          collapsed={false}
+          songAction={EditButton}
+        />
+      )}
       <SongSubmitForm
         open={formOpen}
-        artists={artistsUniq}
+        artists={artists}
         onSubmit={onSubmitSong}
         onClose={() => setFormOpen(false)}
       />
