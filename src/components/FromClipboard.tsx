@@ -11,17 +11,17 @@ import {
   Link,
   MenuItem,
   Select,
-  SxProps,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { fromURL } from "./utils";
 import { Song, setSong } from "../data/song";
-import { Done } from "@mui/icons-material";
+import { ContentPasteGo, Done } from "@mui/icons-material";
 
 const importColumns = ["artist", "title", "url"] as const;
 type ImportColumns = (typeof importColumns)[number];
@@ -275,8 +275,7 @@ const FromClipboardContent: React.FC<{
 
 const FromClipboard: React.FC<{
   userId: string;
-  sxButton: SxProps;
-}> = ({ userId, sxButton }) => {
+}> = ({ userId }) => {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<Cell[][] | null>(null);
   const onOpen = () => {
@@ -292,9 +291,11 @@ const FromClipboard: React.FC<{
 
   return (
     <>
-      <Button variant="outlined" disabled={open} onClick={onOpen} sx={sxButton}>
-        クリップボードから追加
-      </Button>
+      <Tooltip title="クリップボードから追加">
+        <Button disabled={open} onClick={onOpen}>
+          <ContentPasteGo />
+        </Button>
+      </Tooltip>
       <Dialog open={open} onClose={onClose} maxWidth="lg">
         {rows !== null ? (
           <FromClipboardContent userId={userId} rows={rows} onClose={onClose} />

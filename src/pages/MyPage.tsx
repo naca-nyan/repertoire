@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
+  ButtonGroup,
   Fab,
+  Grid,
   Link,
   Snackbar,
   Stack,
@@ -92,17 +94,21 @@ const MyPageContent: React.FC<{
   const artistsUniq = [...new Set(artists)];
   return (
     <Container maxWidth="xl" sx={{ mt: 3 }}>
-      <Stack direction="row" spacing={1}>
-        <Typography variant="h5">
-          {user.displayName}の知ってる曲リスト
-        </Typography>
-        <ShareButton url={shareURL} />
-        <div style={{ flexGrow: 1 }} />
-        <FromClipboard
-          userId={userId}
-          sxButton={{ display: { xs: "none", md: "flex" } }}
-        />
-      </Stack>
+      <Grid container rowSpacing={1}>
+        <Grid item xs={12} sm={10}>
+          <Stack direction="row" spacing={1}>
+            <Typography variant="h5">
+              {user.displayName}の知ってる曲リスト
+            </Typography>
+            <ShareButton url={shareURL} />
+          </Stack>
+        </Grid>
+        <Grid item xs={12} sm={2}>
+          <ButtonGroup style={{ display: "flex", justifyContent: "flex-end" }}>
+            <FromClipboard userId={userId} />
+          </ButtonGroup>
+        </Grid>
+      </Grid>
       {data.length === 0 && (
         <div style={{ textAlign: "center" }}>
           <Typography sx={{ mt: 6 }}>
