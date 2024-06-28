@@ -115,7 +115,7 @@ const MyPageContent: React.FC<{
     for (const artist of artists) {
       res.set(artist, false);
     }
-    for (const [_, song] of songEntries) {
+    for (const [, song] of songEntries) {
       res.set(song.artist, true);
     }
     for (const artist of artists) {
