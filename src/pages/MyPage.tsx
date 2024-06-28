@@ -33,7 +33,7 @@ import EditButton from "../components/EditButton";
 import FromClipboard from "../components/FromClipboard";
 import Header from "../components/Header";
 import SortableArtistList from "../components/SortableArtistList";
-import { MoveUp } from "@mui/icons-material";
+import { MoveUp, UnfoldLess, UnfoldMore } from "@mui/icons-material";
 
 const ShareButton: React.FC<{ url: string }> = ({ url }) => {
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -88,6 +88,7 @@ const MyPageContent: React.FC<{
     undefined
   );
   const [formOpen, setFormOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [sortArtist, setSortArtist] = useState(false);
   const [artists_, setArtists_] = useState<string[] | undefined>(undefined);
   const artists = artists_ ?? [];
@@ -138,10 +139,18 @@ const MyPageContent: React.FC<{
         <Grid item xs={12} sm={2}>
           <ButtonGroup style={{ display: "flex", justifyContent: "flex-end" }}>
             <FromClipboard userId={userId} />
+            <Tooltip title={collapsed ? "曲を表示" : "曲を隠す"}>
+              <Button
+                disabled={sortArtist}
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                {collapsed || sortArtist ? <UnfoldMore /> : <UnfoldLess />}
+              </Button>
+            </Tooltip>
             <Tooltip title="アーティスト名を並び換え">
               <Button
                 variant={sortArtist ? "contained" : "outlined"}
-                disabled={!artists_}
+                disabled={!artists_ || !collapsed}
                 onClick={() => {
                   if (!artists_) return;
                   if (sortArtist) setOrderArtists(userId, artists_);
@@ -177,7 +186,7 @@ const MyPageContent: React.FC<{
         <SongList
           songEntries={songEntries}
           sortBy={artists}
-          collapsed={false}
+          collapsed={collapsed}
           songAction={EditButton}
         />
       )}

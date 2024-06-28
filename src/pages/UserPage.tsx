@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Container,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 
 import {
   SongEntry,
@@ -14,6 +22,7 @@ import NotFoundPage from "./NotFoundPage";
 import LoadingPage from "./LoadingPage";
 import StarButton from "../components/StarButton";
 import Header from "../components/Header";
+import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
 
 function filterSongs(songEntries: SongEntry[], filter: string): SongEntry[] {
   const filterLowerCase = filter.toLowerCase();
@@ -43,12 +52,16 @@ const SongPageContent: React.FC<{
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           @{screenName} さんの知ってる曲
         </Typography>
-        <Button
-          onClick={() => setCollapsed(!collapsed)}
-          sx={{ textAlign: "right" }}
-        >
-          {collapsed ? "Open" : "Close"} All
-        </Button>
+        <ButtonGroup>
+          <Tooltip title={collapsed ? "曲を表示" : "曲を隠す"}>
+            <Button onClick={() => setCollapsed(!collapsed)}>
+              <Typography sx={{ mr: 1 }}>
+                {collapsed ? "Open" : "Close"} All
+              </Typography>
+              {collapsed ? <UnfoldMore /> : <UnfoldLess />}
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
       </Stack>
       <Box sx={{ marginTop: 1, marginBottom: 2 }}>
         <SearchBar onInput={(v) => setFilter(v)} />
