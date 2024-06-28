@@ -103,19 +103,21 @@ const SongListOfArtist: React.FC<{
 function uniqByArtist(
   songEntries: SongEntry[],
   sortBy: string[]
-): Record<string, SongEntry[]> {
-  const artists: Record<string, SongEntry[]> = {};
+): Map<string, SongEntry[]> {
+  const res: Map<string, SongEntry[]> = new Map();
   for (const artist of sortBy) {
-    artists[artist] = [];
+    res.set(artist, []);
   }
   for (const [songId, song] of songEntries) {
-    const songsOfTheArtist = artists[song.artist] ?? [];
-    artists[song.artist] = [...songsOfTheArtist, [songId, song]];
+    const songs = res.get(song.artist) ?? [];
+    songs.push([songId, song]);
+    res.set(song.artist, songs);
   }
   for (const artist of sortBy) {
-    if (artists[artist].length === 0) delete artists[artist];
+    const songs = res.get(artist);
+    if (songs && songs.length === 0) res.delete(artist);
   }
-  return artists;
+  return res;
 }
 
 const SongList: React.FC<{
@@ -133,7 +135,7 @@ const SongList: React.FC<{
   });
   return (
     <List dense sx={styles}>
-      {Object.entries(uniq).map(([artist, songs]) => (
+      {Array.from(uniq.entries(), ([artist, songs]) => (
         <SongListOfArtist
           key={artist}
           artist={artist}

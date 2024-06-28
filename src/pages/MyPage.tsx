@@ -111,17 +111,17 @@ const MyPageContent: React.FC<{
 
   const setDefaultOrderArtists = () => {
     if (!artists_ || !songEntries) return;
-    const res: Record<string, boolean> = {};
+    const res: Map<string, boolean> = new Map();
     for (const artist of artists) {
-      res[artist] = false;
+      res.set(artist, false);
     }
     for (const [_, song] of songEntries) {
-      res[song.artist] = true;
+      res.set(song.artist, true);
     }
     for (const artist of artists) {
-      if (!res[artist]) delete res[artist];
+      if (!res.get(artist)) res.delete(artist);
     }
-    setArtists_(Object.keys(res));
+    setArtists_([...res.keys()]);
   };
 
   const shareURL = window.location.origin + "/users/" + user.screenName;
