@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "v1": {
+      "users": {
+        ".read": true,
+        ".indexOn": "screenName",
+        "$uid": {
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+    "v2": {
+      "users": {
+        ".read": true,
+        ".indexOn": ["screenName", "screenNameLowerCase"],
+        "$uid": {
+          ".write": "$uid === auth.uid"
+        }
+      }
+    }
+  }
+}

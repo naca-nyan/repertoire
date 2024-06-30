@@ -100,21 +100,33 @@ const SongListOfArtist: React.FC<{
   );
 };
 
-function uniqByArtist(songEntries: SongEntry[]): Record<string, SongEntry[]> {
-  const artists: Record<string, SongEntry[]> = {};
-  for (const [songId, song] of songEntries) {
-    const songsOfTheArtist = artists[song.artist] ?? [];
-    artists[song.artist] = [...songsOfTheArtist, [songId, song]];
+function uniqByArtist(
+  songEntries: SongEntry[],
+  sortBy: string[]
+): Map<string, SongEntry[]> {
+  const res: Map<string, SongEntry[]> = new Map();
+  for (const artist of sortBy) {
+    res.set(artist, []);
   }
-  return artists;
+  for (const [songId, song] of songEntries) {
+    const songs = res.get(song.artist) ?? [];
+    songs.push([songId, song]);
+    res.set(song.artist, songs);
+  }
+  for (const artist of sortBy) {
+    const songs = res.get(artist);
+    if (songs && songs.length === 0) res.delete(artist);
+  }
+  return res;
 }
 
 const SongList: React.FC<{
-  data: SongEntry[];
+  songEntries: SongEntry[];
+  sortBy: string[];
   collapsed: boolean;
   songAction: React.FC<{ songEntry: SongEntry }>;
-}> = React.memo(({ data, collapsed, songAction }) => {
-  const uniq = uniqByArtist(data);
+}> = React.memo(({ songEntries, sortBy, collapsed, songAction }) => {
+  const uniq = uniqByArtist(songEntries, sortBy);
   const styles = (theme: Theme) => ({
     [theme.breakpoints.up("sm")]: { columnCount: 2 },
     [theme.breakpoints.up("md")]: { columnCount: 3 },
@@ -123,7 +135,7 @@ const SongList: React.FC<{
   });
   return (
     <List dense sx={styles}>
-      {Object.entries(uniq).map(([artist, songs]) => (
+      {Array.from(uniq.entries(), ([artist, songs]) => (
         <SongListOfArtist
           key={artist}
           artist={artist}
