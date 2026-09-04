@@ -1,0 +1,3 @@
+[tools]
+java = "latest"
+node = "24"
