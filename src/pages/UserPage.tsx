@@ -94,7 +94,10 @@ const SongPage: React.FC = () => {
     }
     getUserIdByScreenName(screenName)
       .then((userId) => setUserId(userId))
-      .catch((e) => console.warn(e));
+      .catch((e) => {
+        console.warn(e);
+        setData(null);
+      });
   }, [screenName]);
 
   useEffect(() => {
