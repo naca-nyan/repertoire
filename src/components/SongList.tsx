@@ -74,7 +74,7 @@ const SongListOfArtist: React.FC<{
   const [open, setOpen] = useState(openInitial ?? true);
   useEffect(() => setOpen(openInitial ?? true), [openInitial]);
   return (
-    <Card sx={{ marginBottom: 2 }}>
+    <Card sx={{ marginBottom: 2, breakInside: "avoid" }}>
       <ListItem disableGutters disablePadding>
         <ListItemButton
           onClick={() => setOpen(!open)}
