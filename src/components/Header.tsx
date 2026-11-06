@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const Header: React.FC<{ title: string }> = ({ title }) => {
-  const suffix = "Repertoire";
+  const suffix = "Repertoire(レパートリー)";
   useEffect(() => {
     document.title = title ? `${title} | ${suffix}` : suffix;
   }, [title]);

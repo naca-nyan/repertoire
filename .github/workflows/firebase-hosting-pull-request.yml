@@ -19,3 +19,4 @@ jobs:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYNCROOM_REPERTOIRE }}"
           projectId: syncroom-repertoire
+          firebaseToolsVersion: 15.34.0
