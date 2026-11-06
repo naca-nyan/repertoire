@@ -74,7 +74,7 @@ const AppContainer: React.FC = () => {
               }}
             >
               <Typography variant="h6" noWrap>
-                Repertoire
+                Repertoire(レパートリー)
               </Typography>
             </Link>
             {us.state === "loading" ? (

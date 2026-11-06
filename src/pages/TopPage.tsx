@@ -13,7 +13,7 @@ const TopPage: React.FC = () => {
     <Container maxWidth="sm" sx={{ pt: 2, textAlign: "center" }}>
       <Header title="" />
       <Typography variant="h5" sx={{ mt: 10, color: "primary" }}>
-        『Repertoire』
+        『Repertoire(レパートリー)』
       </Typography>
       <Typography sx={{ mt: 1, mx: 10 }}>
         は演奏できるレパートリーのコード譜や楽譜を登録して、みんなと共有できるサービスです。
