@@ -8,7 +8,6 @@ import {
   Menu,
   MenuItem,
   Toolbar,
-  Typography,
 } from "@mui/material";
 import { Container } from "@mui/system";
 import { LibraryMusic } from "@mui/icons-material";
@@ -16,6 +15,7 @@ import { Link, Outlet } from "react-router-dom";
 import { UserStateContext } from "../contexts/user";
 import { signIn, signOut } from "../auth";
 import { UserInfo } from "../data/user";
+import Logo from "./Logo";
 
 const AvatarMenu: React.FC<{ user: UserInfo; signOut: () => void }> = ({
   user,
@@ -73,9 +73,7 @@ const AppContainer: React.FC = () => {
                 flexGrow: 1,
               }}
             >
-              <Typography variant="h6" noWrap>
-                Repertoire(レパートリー)
-              </Typography>
+              <Logo height={40} />
             </Link>
             {us.state === "loading" ? (
               <CircularProgress color="inherit" />

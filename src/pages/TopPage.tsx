@@ -6,6 +6,7 @@ import LoadingPage from "./LoadingPage";
 import { Link } from "react-router-dom";
 import { signIn } from "../auth";
 import Header from "../components/Header";
+import Logo from "../components/Logo";
 
 const TopPage: React.FC = () => {
   const us = useContext(UserStateContext);
@@ -13,7 +14,7 @@ const TopPage: React.FC = () => {
     <Container maxWidth="sm" sx={{ pt: 2, textAlign: "center" }}>
       <Header title="" />
       <Typography variant="h5" sx={{ mt: 10, color: "primary" }}>
-        『Repertoire(レパートリー)』
+        <Logo height={56} style={{ margin: "0 auto" }} />
       </Typography>
       <Typography sx={{ mt: 1, mx: 10 }}>
         は演奏できるレパートリーのコード譜や楽譜を登録して、みんなと共有できるサービスです。
